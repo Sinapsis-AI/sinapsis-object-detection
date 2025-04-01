@@ -1,0 +1,91 @@
+[project]
+name = "sinapsis-dfine"
+version = "0.1.0"
+description = "Training and inference templates based on the D-FINE architecture."
+authors = [
+    {name = "SinapsisAI", email = "dev@sinapsis.tech"},
+]
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.10"
+dependencies = [
+    "dfine",
+    "huggingface-hub>=0.29.3",
+    "opencv-python-headless>=4.11.0.86",
+    "sinapsis>=0.1.1",
+    "sinapsis-generic-data-tools>=0.1.1",
+]
+
+[project.optional-dependencies]
+
+
+sinapsis-data-readers = [
+    "sinapsis-data-readers>=0.1.1",
+]
+sinapsis-data-visualization = [
+    "sinapsis-data-visualization[all]>=0.1.0",
+]
+sinapsis-data-writers = [
+    "sinapsis-data-writers>=0.1.1",
+]
+all = [
+    "sinapsis-dfine[sinapsis-data-readers,sinapsis-data-visualization,sinapsis-data-writers,training]",
+]
+training = [
+    "dfine[training]>=0.1.0",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.8.3",
+    "pre-commit>=4.0.1",
+]
+
+[tool.ruff]
+lint.select = [
+    "ARG",
+    "ANN",
+    "BLE",
+    "C4",
+    "E",
+    "F",
+    "FIX",
+    "FLY",
+    "I",
+    "PERF",
+    "PIE",
+    "RUF",
+    "RSE",
+    "SIM",
+    "SLOT",
+    "T10",
+    "T20",
+    "TD",
+    "TID",
+]
+lint.ignore = ["ANN401"]
+line-length = 120
+show-fixes = true
+
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+
+[[tool.uv.index]]
+name = "sinapsis"
+url = "https://pypi.sinapsis.tech/"
+
+[tool.uv.sources]
+dfine = { git = "https://github.com/DrRzGa/D-FINE.git" }
+sinapsis-dfine = { workspace = true }
+
+[tool.setuptools]
+license-files = []
+
+[project.urls]
+Homepage = "https://sinapsis.tech"
+Documentation = "https://docs.sinapsis.tech/docs"
+Tutorials = "https://docs.sinapsis.tech/tutorials"
+Repository = "https://github.com/Sinapsis-AI/sinapsis-object-detection.git"

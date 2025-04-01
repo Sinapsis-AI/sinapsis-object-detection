@@ -1,0 +1,22 @@
+agent:
+  name: dfine_training
+  description: "Agent that runs a fine-tuning job on pre-trained D-FINE nano model"
+
+templates:
+  - template_name: InputTemplate
+    class_name: InputTemplate
+    attributes: {}
+
+  - template_name: DFINETraining
+    class_name: DFINETraining
+    template_input: InputTemplate
+    attributes:
+      config_file: configs/dfine/dfine_hgnetv2_n_coco.yml
+      training_mode: tune
+      seed: 42
+      use_amp: true
+      device: cuda
+      output_dir: ./artifacts/dfine_hgnetv2_n_coco
+      pretrained_model:
+        size: n
+        variant: coco

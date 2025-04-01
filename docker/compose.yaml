@@ -1,0 +1,25 @@
+services:
+  sinapsis-object-detection-main: &default
+    image: sinapsis-object-detection:base
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile
+      ssh:
+        - default
+    shm_size: '8gb'
+    environment:
+      PYTHONUNBUFFERED: 1
+      GRADIO_SHARE_APP: ${GRADIO_SHARE_APP:-false}
+      PYTHONPATH: /lib/python3.10/:/app/.venv/lib/python3.10/site-packages
+      AGENT_CONFIG_PATH: /app/configs/demo.yml
+    volumes:
+      - "~/.cache/sinapsis/:/root/.cache/sinapsis"
+    network_mode: "host"
+    working_dir: /app
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

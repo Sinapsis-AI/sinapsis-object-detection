@@ -1,0 +1,16 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+packages/sinapsis-dfine/dist/
+wheels/
+*.egg-info
+artifacts/
+*_test*
+resources/
+# Virtual environments
+.venv
+packages/sinapsis-dfine/src/sinapsis_dfine/thirdparty/dfine
+artifacts
+datasets
+*tests/

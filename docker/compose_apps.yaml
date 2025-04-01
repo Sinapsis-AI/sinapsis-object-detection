@@ -1,0 +1,11 @@
+services:
+  sinapsis-dfine-gradio:
+    extends:
+      service: sinapsis-object-detection-main
+      file: compose.yaml
+    container_name: sinapsis-dfine-gradio
+    volumes:
+      - "../packages/sinapsis-dfine/src/sinapsis_dfine/configs/:/app/configs/"
+      - "../webapps/:/app/webapps/"
+      - "../artifacts/configs/:/app/artifacts/configs/"
+    command: python3 webapps/detection_demo.py
