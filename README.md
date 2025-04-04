@@ -9,7 +9,7 @@ Sinapsis Object Detection
 <br>
 </h1>
 
-<h4 align="center">Mono repo with packages for training and inference with various models for advanced object detection tasks.</h4>
+<h4 align="center">Mono repo with packages for training and inference, supporting multiple models for advanced object detection tasks.</h4>
 
 <p align="center">
 <a href="#installation">🐍 Installation</a> •
