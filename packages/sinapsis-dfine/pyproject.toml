@@ -9,7 +9,7 @@ readme = "README.md"
 license = {file = "LICENSE"}
 requires-python = ">=3.10"
 dependencies = [
-    "dfine@git+https://github.com/DrRzGa/D-FINE",
+    "dfine>=0.1.0",
     "huggingface-hub>=0.29.3",
     "opencv-python-headless>=4.11.0.86",
     "sinapsis>=0.1.1",
@@ -17,6 +17,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+
 
 
 sinapsis-data-readers = [
@@ -31,12 +32,13 @@ sinapsis-data-writers = [
 all = [
     "sinapsis-dfine[gradio,sinapsis-data-readers,sinapsis-data-visualization,sinapsis-data-writers,training]",
 ]
-training = [
-    "dfine[training]",
-]
+
 gradio = [
     "sinapsis-dfine[sinapsis-data-visualization]",
     "sinapsis[webapp]>=0.2.2",
+]
+training = [
+    "dfine[training]>=0.1.0",
 ]
 
 [dependency-groups]
@@ -82,7 +84,6 @@ name = "sinapsis"
 url = "https://pypi.sinapsis.tech/"
 
 [tool.uv.sources]
-dfine = { git = "https://github.com/DrRzGa/D-FINE" }
 sinapsis-dfine = { workspace = true }
 
 
