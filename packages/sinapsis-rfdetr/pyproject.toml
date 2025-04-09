@@ -1,42 +1,33 @@
 [project]
-name = "sinapsis-dfine"
-version = "0.1.1"
-description = "Training and inference templates based on the D-FINE architecture."
+name = "sinapsis-rfdetr"
+version = "0.1.0"
+description = "Training and inference templates based on the RF-DETR object detection model"
 authors = [
     {name = "SinapsisAI", email = "dev@sinapsis.tech"},
 ]
 readme = "README.md"
 license = {file = "LICENSE"}
-requires-python = ">=3.10"
+requires-python = ">=3.10.12"
 dependencies = [
-    "dfine@git+https://github.com/DrRzGa/D-FINE",
-    "huggingface-hub>=0.29.3",
-    "opencv-python-headless>=4.11.0.86",
+    "numpy==1.26.4",
+    "onnxruntime>=1.21.0",
+    "protobuf==3.20.2",
+    "rfdetr[metrics]>=1.0.8",
     "sinapsis>=0.1.1",
-    "sinapsis-generic-data-tools>=0.1.1",
 ]
 
 [project.optional-dependencies]
-
-
-sinapsis-data-readers = [
-    "sinapsis-data-readers>=0.1.1",
-]
-sinapsis-data-visualization = [
+gradio = [
     "sinapsis-data-visualization[all]>=0.1.0",
-]
-sinapsis-data-writers = [
-    "sinapsis-data-writers>=0.1.1",
+    "sinapsis[webapp]>=0.2.2",
 ]
 all = [
-    "sinapsis-dfine[gradio,sinapsis-data-readers,sinapsis-data-visualization,sinapsis-data-writers,training]",
+    "sinapsis-rfdetr[data-tools,gradio]",
 ]
-training = [
-    "dfine[training]",
-]
-gradio = [
-    "sinapsis-dfine[sinapsis-data-visualization]",
-    "sinapsis[webapp]>=0.2.2",
+data-tools = [
+    "sinapsis-data-readers>=0.1.2",
+    "sinapsis-data-visualization[all]>=0.1.0",
+    "sinapsis-data-writers[all]>=0.1.1",
 ]
 
 [dependency-groups]
@@ -82,9 +73,8 @@ name = "sinapsis"
 url = "https://pypi.sinapsis.tech/"
 
 [tool.uv.sources]
-dfine = { git = "https://github.com/DrRzGa/D-FINE" }
-sinapsis-dfine = { workspace = true }
-
+sinapsis-rf-detr = { workspace = true }
+sinapsis-rfdetr = { workspace = true }
 
 
 [project.urls]

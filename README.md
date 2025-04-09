@@ -9,7 +9,7 @@ Sinapsis Object Detection
 <br>
 </h1>
 
-<h4 align="center">Mono repo with packages for training and inference, supporting multiple models for advanced object detection tasks.</h4>
+<h4 align="center">Mono repo with packages for training and inference with various models for advanced object detection tasks.</h4>
 
 <p align="center">
 <a href="#installation">🐍 Installation</a> •
@@ -29,6 +29,7 @@ Sinapsis Object Detection
 This repo includes packages for performing object detection using different models:
 
 * <code>sinapsis-dfine</code>
+* <code>sinapsis-rfdetr</code>
 
 Install using your package manager of choice. We strongly encourage the use of <code>uv</code>. If you need to install <code>uv</code> please see the [official documentation](https://docs.astral.sh/uv/getting-started/installation/#installation-methods).
 
@@ -82,6 +83,19 @@ For specific instructions and further details, see the [README.md](https://githu
 
 </details>
 
+<details>
+<summary id="uv"><strong><span style="font-size: 1.4em;">Sinapsis RF-DETR</span></strong></summary>
+
+The package provides templates for **training**, **inference**, and **export** with the RF-DETR model, enabling advanced **object detection** tasks. It includes:
+
+- **RFDETRExport** and **RFDETRLargeExport**: Templates for exporting the RFDETRBase and RFDETRLarge models to ONNX format.
+- **RFDETRInference** and **RFDETRLargeInference**: Templates designed to perform inference on a set of images using the RFDETRBase and RFDETRLarge models.
+- **RFDETRTrain** and **RFDETRLargeTrain**: Templates for training the RFDETRBase and RFDETRLarge models.
+
+For specific instructions and further details, see the [README.md](https://github.com/Sinapsis-AI/sinapsis-object-detection/blob/main/packages/sinapsis_rfdetr/README.md).
+
+</details>
+
 <h2 id="webapp">🌐 Webapp</h2>
 
 The webapps included in this project demonstrate the modularity of the templates, showcasing the capabilities of various object detection models for different tasks.
@@ -98,7 +112,7 @@ cd sinapsis-object-detection
 > If you'd like to enable external app sharing in Gradio, `export GRADIO_SHARE_APP=True`
 
 > [!NOTE]
-> Agent configuration can be changed through the AGENT_CONFIG_PATH env var. You can check the available configurations in each package configs folder.
+> Agent configuration can be changed through the `AGENT_CONFIG_PATH` env var. You can check the available configurations in each package configs folder.
 
 > [!NOTE]
 > When running the app with the **D-FINE** model, it defaults to a confidence threshold of `0.5`, uses **CUDA** for acceleration, and employs the **nano-sized** D-FINE model trained on the **COCO dataset**. These settings can be customized by modifying the `demo.yml` file inside the `configs` directory of the `sinapsis-dfine` package and restarting the webapp.
@@ -109,25 +123,35 @@ cd sinapsis-object-detection
 
 **IMPORTANT** This docker image depends on the sinapsis-nvidia:base image. Please refer to the official [sinapsis](https://github.com/Sinapsis-ai/sinapsis?tab=readme-ov-file#docker) instructions to Build with Docker.
 
-1. **Build the sinapsis-dfine image**:
+1. **Build the sinapsis-object-detection image**:
 ```bash
 docker compose -f docker/compose.yaml build
 ```
-
 2. **Start the app container**:
 ```bash
 docker compose -f docker/compose_apps.yaml up sinapsis-dfine-gradio -d
 ```
+
+**NOTE**: You can also deploy the service for the RF-DETR package using
+```bash
+docker compose -f docker/compose_apps.yaml up sinapsis-rfdetr-gradio -d
+```
+
 3. **Check the status**:
 ```bash
 docker logs -f sinapsis-dfine-gradio
 ```
+
+**NOTE**: If using the RF-DETR package, please change the name of the service accordingly
+
 4. **The logs will display the URL to access the webapp, e.g.**:
 
-NOTE: The url can be different, check the output of logs
 ```bash
 Running on local URL:  http://127.0.0.1:7860
 ```
+
+**NOTE**: The url can be different, check the output of logs.
+
 5. **To stop the app**:
 ```bash
 docker compose -f docker/compose_apps.yaml down
@@ -143,7 +167,7 @@ To run the webapp using the <code>uv</code> package manager, please:
 
 1. **Create the virtual environment and sync the dependencies**:
 ```bash
-uv sync --frozen 
+uv sync --frozen
 ```
 2. **Install the sinapsis-object-detection package**:
 ```bash
@@ -153,12 +177,18 @@ uv pip install sinapsis-object-detection[all] --extra-index-url https://pypi.sin
 ```bash
 uv run webapps/detection_demo.py
 ```
-5. **The terminal will display the URL to access the webapp, e.g.**:
 
-NOTE: The url can be different, check the output of the terminal
+**NOTE**: To use the RF-DETR model, specify the correct configuration file before running the app
+```bash
+export AGENT_CONFIG_PATH=packages/sinapsis-rfdetr/src/sinapsis_rfdetr/configs/rfdetr_demo.yml
+```
+
+4. **The terminal will display the URL to access the webapp, e.g.**:
+
 ```bash
 Running on local URL:  http://127.0.0.1:7860
 ```
+**NOTE**: The url can be different, check the output of the terminal.
 
 </details>
 

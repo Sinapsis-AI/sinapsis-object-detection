@@ -15,6 +15,7 @@ Sinapsis D-FINE
 <a href="#installation">🐍  Installation</a> •
 <a href="#features"> 🚀 Features</a> •
 <a href="#example"> 📚 Usage example</a> •
+<a href="#webapp"> 🌐 Webapp</a> •
 <a href="#documentation">📙 Documentation</a> •
 <a href="#license"> 🔍 License </a>
 </p>
@@ -164,6 +165,92 @@ To run the config, use the CLI:
 ```bash
 sinapsis run name_of_config.yml
 ```
+
+<h2 id="webapp">🌐 Webapp</h2>
+
+The webapps included in this project demonstrate the modularity of the templates, showcasing the capabilities of various object detection models for different tasks.
+
+> [!IMPORTANT]
+> To run the app, you first need to clone this repository:
+
+```bash
+git clone git@github.com:Sinapsis-ai/sinapsis-object-detection.git
+cd sinapsis-object-detection
+```
+
+> [!NOTE]
+> If you'd like to enable external app sharing in Gradio, `export GRADIO_SHARE_APP=True`
+
+> [!NOTE]
+> Agent configuration can be changed through the `AGENT_CONFIG_PATH` env var. You can check the available configurations in each package configs folder.
+
+> [!NOTE]
+> When running the app with the **D-FINE** model, it defaults to a confidence threshold of `0.5`, uses **CUDA** for acceleration, and employs the **nano-sized** D-FINE model trained on the **COCO dataset**. These settings can be customized by modifying the `demo.yml` file inside the `configs` directory of the `sinapsis-dfine` package and restarting the webapp.
+
+
+<details>
+<summary id="uv"><strong><span style="font-size: 1.4em;">🐳 Docker</span></strong></summary>
+
+**IMPORTANT** This docker image depends on the sinapsis-nvidia:base image. Please refer to the official [sinapsis](https://github.com/Sinapsis-ai/sinapsis?tab=readme-ov-file#docker) instructions to Build with Docker.
+
+1. **Build the sinapsis-object-detection image**:
+```bash
+docker compose -f docker/compose.yaml build
+```
+2. **Start the app container**:
+```bash
+docker compose -f docker/compose_apps.yaml up sinapsis-dfine-gradio -d
+```
+
+3. **Check the status**:
+```bash
+docker logs -f sinapsis-dfine-gradio
+```
+
+**NOTE**: If using the RF-DETR package, please change the name of the service accordingly
+
+4. **The logs will display the URL to access the webapp, e.g.**:
+
+```bash
+Running on local URL:  http://127.0.0.1:7860
+```
+
+**NOTE**: The url can be different, check the output of logs.
+
+5. **To stop the app**:
+```bash
+docker compose -f docker/compose_apps.yaml down
+```
+
+</details>
+
+
+<details>
+<summary id="uv"><strong><span style="font-size: 1.4em;">💻 UV</span></strong></summary>
+
+To run the webapp using the <code>uv</code> package manager, please:
+
+1. **Create the virtual environment and sync the dependencies**:
+```bash
+uv sync --frozen
+```
+2. **Install the sinapsis-object-detection package**:
+```bash
+uv pip install sinapsis-object-detection[all] --extra-index-url https://pypi.sinapsis.tech
+```
+3. **Run the webapp**:
+```bash
+uv run webapps/detection_demo.py
+```
+
+4. **The terminal will display the URL to access the webapp, e.g.**:
+
+```bash
+Running on local URL:  http://127.0.0.1:7860
+```
+**NOTE**: The url can be different, check the output of the terminal.
+
+</details>
 
 
 

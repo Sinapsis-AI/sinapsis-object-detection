@@ -1,0 +1,38 @@
+agent:
+  name: rfdetr_inference
+  description: Agent that runs inferences on a dataset with pre-trained RF-DETR model
+
+templates:
+  - template_name: InputTemplate
+    class_name: InputTemplate
+    attributes: {}
+
+  - template_name : VideoReaderCV2
+    class_name: VideoReaderCV2
+    template_input: InputTemplate
+    attributes:
+      video_file_path : artifacts/palace.mp4
+      batch_size: -1
+
+  - template_name: RFDETRInference
+    class_name: RFDETRInference
+    template_input: VideoReaderCV2
+    attributes:
+      threshold: 0.5
+
+  - template_name: BBoxDrawer
+    class_name: BBoxDrawer
+    template_input: RFDETRInference
+    attributes:
+      draw_confidence: True
+      randomized_color: False
+      overwrite: True
+
+  - template_name: VideoWriterCV2
+    class_name: VideoWriterCV2
+    template_input: BBoxDrawer
+    attributes:
+      destination_path: artifacts/result.mp4
+      height: -1
+      width: -1
+      fps: 30
