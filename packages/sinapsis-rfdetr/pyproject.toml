@@ -73,7 +73,6 @@ name = "sinapsis"
 url = "https://pypi.sinapsis.tech/"
 
 [tool.uv.sources]
-sinapsis-rf-detr = { workspace = true }
 sinapsis-rfdetr = { workspace = true }
 
 
