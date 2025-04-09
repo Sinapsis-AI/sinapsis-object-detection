@@ -9,3 +9,15 @@ services:
       - "../webapps/:/app/webapps/"
       - "../artifacts/configs/:/app/artifacts/configs/"
     command: python3 webapps/detection_demo.py
+
+  sinapsis-rfdetr-gradio:
+  extends:
+    service: sinapsis-object-detection-main
+    file: compose.yaml
+  container_name: sinapsis-rfdetr-gradio
+  volumes:
+    - "../packages/sinapsis-rfdetr/src/sinapsis_rfdetr/configs/:/app/configs/"
+    - "../webapps/:/app/webapps/"
+  environment:
+    AGENT_CONFIG_PATH: /app/configs/rfdetr_demo.yml
+  command: python3 webapps/detection_demo.py
