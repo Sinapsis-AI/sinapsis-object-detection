@@ -1,8 +1,0 @@
-FROM sinapsis-nvidia:base
-
-COPY . /app/
-WORKDIR /app
-RUN uv sync --frozen --extra dfine
-RUN uv build && uv build --all-packages
-RUN uv pip install dist/sinapsis_dfine-0.1.0-py3-none-any.whl[all]
-RUN uv pip install dist/sinapsis_object_detection-0.1.0-py3-none-any.whl[all] 
