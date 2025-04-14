@@ -30,6 +30,7 @@ This repo includes packages for performing object detection using different mode
 
 * <code>sinapsis-dfine</code>
 * <code>sinapsis-rfdetr</code>
+* <code>sinapsis-ultralytics</code>
 
 Install using your package manager of choice. We strongly encourage the use of <code>uv</code>. If you need to install <code>uv</code> please see the [official documentation](https://docs.astral.sh/uv/getting-started/installation/#installation-methods).
 
@@ -42,7 +43,7 @@ Example with <code>uv</code>:
 ```bash
   pip install sinapsis-dfine --extra-index-url https://pypi.sinapsis.tech
 ```
-**Change the name of the package for the one you want to install.**
+**Replace `sinapsis-dfine` with the name of the package you intend to install.**
 
 
 
@@ -58,7 +59,7 @@ with <code>uv</code>:
 ```bash
   pip install sinapsis-dfine[all] --extra-index-url https://pypi.sinapsis.tech
 ```
-**Change the name of the package accordingly.**
+**Be sure to substitute `sinapsis-dfine` with the appropriate package name.**
 
 > [!TIP]
 > You can also install all the packages within this project:
@@ -96,6 +97,20 @@ For specific instructions and further details, see the [README.md](https://githu
 
 </details>
 
+<details>
+<summary id="uv"><strong><span style="font-size: 1.4em;">Sinapsis Ultralytics</span></strong></summary>
+
+The package provides templates for **training**, **inference**, **validation**, and **exporting** models with Ultralytics. It includes:
+
+- **UltralyticsTrain**: Template for training Ultralytics models.
+- **UltralyticsVal**: Template for validating Ultralytics models.
+- **UltralyticsPredict**: Template for generating inference predictions with trained models.
+- **UltralyticsExport**: Template for exporting models to deployment-ready format.
+
+For specific instructions and further details, see the [README.md](https://github.com/Sinapsis-AI/sinapsis-object-detection/blob/main/packages/sinapsis_ultralytics/README.md).
+
+</details>
+
 <h2 id="webapp">🌐 Webapp</h2>
 
 The webapps included in this project demonstrate the modularity of the templates, showcasing the capabilities of various object detection models for different tasks.
@@ -128,21 +143,56 @@ cd sinapsis-object-detection
 docker compose -f docker/compose.yaml build
 ```
 2. **Start the app container**:
+
+- For D-FINE:
+
 ```bash
 docker compose -f docker/compose_apps.yaml up sinapsis-dfine-gradio -d
 ```
 
-**NOTE**: You can also deploy the service for the RF-DETR package using
+- For RF-DETR:
+
 ```bash
 docker compose -f docker/compose_apps.yaml up sinapsis-rfdetr-gradio -d
 ```
 
-3. **Check the status**:
+- For Ultralytics Inference:
+
+```bash
+docker compose -f docker/compose_apps.yaml up sinapsis-ultralytics-inference -d
+```
+
+- For Ultralytics Training:
+
+```bash
+docker compose -f docker/compose_apps.yaml up sinapsis-ultralytics-train -d
+```
+
+3. **Check the logs**:
+
+- For D-FINE:
+
 ```bash
 docker logs -f sinapsis-dfine-gradio
 ```
 
-**NOTE**: If using the RF-DETR package, please change the name of the service accordingly
+- For RF-DETR:
+
+```bash
+docker logs -f sinapsis-rfdetr-gradio
+```
+
+- For Ultralytics Inference:
+
+```bash
+docker logs -f sinapsis-ultralytics-inference
+```
+
+- For Ultralytics Training:
+
+```bash
+docker logs -f sinapsis-ultralytics-train
+```
 
 4. **The logs will display the URL to access the webapp, e.g.**:
 
@@ -163,7 +213,7 @@ docker compose -f docker/compose_apps.yaml down
 <details>
 <summary id="uv"><strong><span style="font-size: 1.4em;">💻 UV</span></strong></summary>
 
-To run the webapp using the <code>uv</code> package manager, please:
+To run the webapp using the <code>uv</code> package manager, follow these steps:
 
 1. **Create the virtual environment and sync the dependencies**:
 ```bash
@@ -174,21 +224,40 @@ uv sync --frozen
 uv pip install sinapsis-object-detection[all] --extra-index-url https://pypi.sinapsis.tech
 ```
 3. **Run the webapp**:
+
+- For D-FINE:
+
 ```bash
 uv run webapps/detection_demo.py
 ```
 
-**NOTE**: To use the RF-DETR model, specify the correct configuration file before running the app
+- For RF-DETR:
+
 ```bash
-export AGENT_CONFIG_PATH=packages/sinapsis-rfdetr/src/sinapsis_rfdetr/configs/rfdetr_demo.yml
+export AGENT_CONFIG_PATH=packages/sinapsis_rfdetr/src/sinapsis_rfdetr/configs/rfdetr_demo.yml
+uv run webapps/detection_demo.py
 ```
+
+- For Ultralytics Inference:
+
+```bash
+uv run webapps/inference_app.py
+```
+
+- For Ultralytics Training:
+
+```bash
+uv run webapps/training_app.py
+```
+
 
 4. **The terminal will display the URL to access the webapp, e.g.**:
 
 ```bash
 Running on local URL:  http://127.0.0.1:7860
 ```
-**NOTE**: The url can be different, check the output of the terminal.
+
+**NOTE**: The URL may vary; check the terminal output for the correct address.
 
 </details>
 
