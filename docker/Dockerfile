@@ -1,5 +1,7 @@
 FROM sinapsis-nvidia:base
 
+RUN apt-get update && apt-get install -y git && apt-get clean
+
 COPY . /app/
 WORKDIR /app
 RUN uv sync --frozen

@@ -5,19 +5,39 @@ services:
       file: compose.yaml
     container_name: sinapsis-dfine-gradio
     volumes:
-      - "../packages/sinapsis-dfine/src/sinapsis_dfine/configs/:/app/configs/"
+      - "../packages/sinapsis_dfine/src/sinapsis_dfine/configs/:/app/configs/"
       - "../webapps/:/app/webapps/"
       - "../artifacts/configs/:/app/artifacts/configs/"
     command: python3 webapps/detection_demo.py
 
   sinapsis-rfdetr-gradio:
-  extends:
-    service: sinapsis-object-detection-main
-    file: compose.yaml
-  container_name: sinapsis-rfdetr-gradio
-  volumes:
-    - "../packages/sinapsis-rfdetr/src/sinapsis_rfdetr/configs/:/app/configs/"
+    extends:
+      service: sinapsis-object-detection-main
+      file: compose.yaml
+    container_name: sinapsis-rfdetr-gradio
+    volumes:
+      - "../packages/sinapsis_rfdetr/src/sinapsis_rfdetr/configs/:/app/configs/"
+      - "../webapps/:/app/webapps/"
+    environment:
+      AGENT_CONFIG_PATH: /app/configs/rfdetr_demo.yml
+    command: python3 webapps/detection_demo.py
+
+  sinapsis-ultralytics-train:
+    extends:
+      service: sinapsis-object-detection-main
+      file: compose.yaml
+    container_name: sinapsis-ultralytics-train
+    volumes:
+    - "../packages/sinapsis_ultralytics/src/sinapsis_ultralytics/configs/:/app//packages/sinapsis_ultralytics/src/sinapsis_ultralytics/configs/"
     - "../webapps/:/app/webapps/"
-  environment:
-    AGENT_CONFIG_PATH: /app/configs/rfdetr_demo.yml
-  command: python3 webapps/detection_demo.py
+    command: python3 webapps/training_app.py
+
+  sinapsis-ultralytics-inference:
+    extends:
+      service: sinapsis-object-detection-main
+      file: compose.yaml
+    container_name: sinapsis-ultralytics-inference
+    volumes:
+      - "../packages/sinapsis-sinapsis_ultralytics/src/sinapsis_ultralytics/configs/:/app//packages/sinapsis_ultralytics/src/sinapsis_ultralytics/configs/"
+      - "../webapps/:/app/webapps/"
+    command: python3 webapps/inference_app.py

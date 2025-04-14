@@ -1,0 +1,20 @@
+agent:
+  name: rfdetr_train
+  description: Agent that runs training on a dataset with pre-trained RF-DETR model
+
+templates:
+  - template_name: InputTemplate
+    class_name: InputTemplate
+    attributes: {}
+
+  - template_name: RFDETRTrain
+    class_name: RFDETRTrain
+    template_input: InputTemplate
+    attributes:
+      training_params:
+        dataset_dir: datasets/COCO Dataset.v37i.coco
+        epochs: 20
+        batch_size: 4
+        grad_accum_steps: 4
+        lr: 1e-4
+        tensorboard: False

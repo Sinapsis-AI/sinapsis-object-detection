@@ -1,36 +1,36 @@
 [project]
-name = "sinapsis-object-detection"
-version = "0.3.0"
-description = "Mono repo with packages for inference and training with object detection models"
+name = "sinapsis-rfdetr"
+version = "0.1.1"
+description = "Training and inference templates based on the RF-DETR object detection model"
 authors = [
     {name = "SinapsisAI", email = "dev@sinapsis.tech"},
 ]
 readme = "README.md"
 license = {file = "LICENSE"}
-requires-python = ">=3.10"
+requires-python = ">=3.10.12"
 dependencies = [
+    "numpy==1.26.4",
+    "onnxruntime>=1.21.0",
+    "protobuf==3.20.2",
+    "rfdetr[metrics]>=1.0.8",
     "sinapsis>=0.1.1",
 ]
 
-[[tool.uv.index]]
-url = "https://pypi.sinapsis.tech/"
+[project.optional-dependencies]
 
+all = [
+    "sinapsis-rfdetr[data-tools]",
+]
+data-tools = [
+    "sinapsis-data-readers>=0.1.2",
+    "sinapsis-data-visualization[all]>=0.1.0",
+    "sinapsis-data-writers[all]>=0.1.1",
+]
 
 [dependency-groups]
 dev = [
     "ruff>=0.8.3",
     "pre-commit>=4.0.1",
-]
-
-[project.optional-dependencies]
-all = [
-    "sinapsis-dfine[all]",
-    "sinapsis-object-detection[gradio-app]",
-    "sinapsis-rfdetr[all]",
-    "sinapsis-ultralytics[all]",
-]
-gradio-app = [
-    "sinapsis[webapp]>=0.2.2",
 ]
 
 [tool.ruff]
@@ -59,24 +59,18 @@ lint.ignore = ["ANN401"]
 line-length = 120
 show-fixes = true
 
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+
 [[tool.uv.index]]
 name = "sinapsis"
 url = "https://pypi.sinapsis.tech/"
 
-
-[tool.uv.workspace]
-members = ["packages/*"]
-exclude = ["packages/*.egg-info"]
-
-[tool.setuptools]
-packages = { find = { where = ["packages"] } }
-
-
 [tool.uv.sources]
 sinapsis-rfdetr = { workspace = true }
-sinapsis-dfine = { workspace = true }
-sinapsis-ultralytics = { workspace = true }
-sinapsis-object-detection = { workspace = true }
 
 
 [project.urls]

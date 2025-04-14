@@ -1,0 +1,78 @@
+[project]
+name = "sinapsis-ultralytics"
+version = "0.1.2"
+description = "Package to build computer vision applications based on the Ultralytics library"
+authors = [{ name = "SinapsisAI", email = "dev@sinapsis-ai.com" }]
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.10"
+dependencies = [
+    "sinapsis>=0.1.1",
+    "ultralytics>=8.3.88",
+]
+
+
+[dependency-groups]
+dev = [
+    "ruff>=0.8.3",
+    "pre-commit>=4.0.1",
+]
+[project.optional-dependencies]
+
+sinapsis-data-visualization = [
+    "sinapsis-data-visualization>=0.1.0",
+]
+all = [
+    "sinapsis-ultralytics[sinapsis-data-readers,sinapsis-data-visualization,sinapsis-data-writers]",
+]
+sinapsis-data-writers = [
+    "sinapsis-data-writers>=0.1.1",
+]
+sinapsis-data-readers = [
+    "sinapsis-data-readers>=0.1.2",
+]
+
+[tool.ruff]
+lint.select = [
+    "ARG",
+    "ANN",
+    "BLE",
+    "C4",
+    "E",
+    "F",
+    "FIX",
+    "FLY",
+    "I",
+    "PERF",
+    "PIE",
+    "RUF",
+    "RSE",
+    "SIM",
+    "SLOT",
+    "T10",
+    "T20",
+    "TD",
+    "TID",
+]
+lint.ignore =['ANN401']
+line-length = 120
+show-fixes = true
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[[tool.uv.index]]
+url = "https://pypi.sinapsis.tech/"
+
+[tool.uv.sources]
+sinapsis-ultralytics = { workspace = true }
+
+[tool.setuptools]
+license-files = []
+
+[project.urls]
+Homepage = "https://sinapsis.tech"
+Documentation = "https://docs.sinapsis.tech/docs"
+Tutorials = "https://docs.sinapsis.tech/tutorials"
+Repository = "https://github.com/Sinapsis-AI/sinapsis-ultralytics.git"

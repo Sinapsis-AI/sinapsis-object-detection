@@ -1,0 +1,20 @@
+agent:
+  name: ultralytics_val
+  description: agent to perform validation of a model using Ultralytics
+templates:
+- template_name: InputTemplate-1
+  class_name: InputTemplate
+  attributes: {}
+
+- template_name: UltralyticsVal
+  class_name: UltralyticsVal
+  template_input: InputTemplate-1
+  attributes:
+    model_class: YOLO
+    model: yolo11n-cls.pt
+    task: detect
+    verbose: 0
+    validation_params:
+      data: cifar10
+      imgsz: 128
+      batch: 16

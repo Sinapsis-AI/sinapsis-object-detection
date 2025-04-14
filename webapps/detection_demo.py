@@ -8,7 +8,7 @@ from sinapsis.webapp.agent_gradio_helper import (
 )
 from sinapsis_core.utils.env_var_keys import AGENT_CONFIG_PATH, GRADIO_SHARE_APP
 
-CONFIG_PATH = AGENT_CONFIG_PATH or "packages/sinapsis-dfine/src/sinapsis_dfine/configs/demo.yml"
+CONFIG_PATH = AGENT_CONFIG_PATH or "packages/sinapsis_dfine/src/sinapsis_dfine/configs/demo.yml"
 
 
 def create_demo() -> gr.Blocks:
@@ -17,9 +17,9 @@ def create_demo() -> gr.Blocks:
     Returns:
         gr.Blocks: A configured Gradio Blocks interface ready to launch.
     """
-    with gr.Blocks(css=css_header(), title="Sinapsis D-FINE") as demo:
-        add_logo_and_title("Sinapsis D-FINE: Object Detection")
-        init_image_inference(CONFIG_PATH, app_message="""Detect objects in images using the D-FINE model.""")
+    with gr.Blocks(css=css_header(), title="Sinapsis Object Detection") as demo:
+        add_logo_and_title("Sinapsis Object Detection")
+        init_image_inference(CONFIG_PATH, app_message="""Detect objects in images using state-of-the-art models.""")
 
     return demo
 

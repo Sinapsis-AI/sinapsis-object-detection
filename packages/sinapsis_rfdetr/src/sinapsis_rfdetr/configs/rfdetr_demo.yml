@@ -1,0 +1,24 @@
+agent:
+  name: rfdetr_demo
+  description: Agent that runs inferences on images using the gradio interface
+
+templates:
+  - template_name: InputTemplate
+    class_name: InputTemplate
+    attributes: {}
+
+  - template_name: RFDETRInference
+    class_name: RFDETRInference
+    template_input: InputTemplate
+    attributes:
+      threshold: 0.5
+      #annotations_path: datasets/COCO Dataset.v37i.coco/test/_annotations.coco.json
+      #model_params:
+      #  pretrain_weights: checkpoint_best_total.pth
+      #  num_classes: 78
+
+  - template_name: BBoxDrawer
+    class_name: BBoxDrawer
+    template_input: RFDETRInference
+    attributes:
+      randomized_color: false

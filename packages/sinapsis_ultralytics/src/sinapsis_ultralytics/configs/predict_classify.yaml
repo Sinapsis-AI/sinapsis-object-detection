@@ -1,0 +1,27 @@
+agent:
+  name: classify_predict
+  description: agent to run inference with a classification model using Ultralytics
+
+templates:
+- template_name: InputTemplate-1
+  class_name: InputTemplate
+  attributes: { }
+
+- template_name: UltralyticsPredict
+  class_name: UltralyticsPredict
+  template_input: InputTemplate-1
+  attributes:
+    model_class: YOLO
+    model: yolo11n-cls.pt
+    task: classify
+    verbose: 0
+    predict_params: {}
+
+- template_name: LabelDrawer
+  class_name: LabelDrawer
+  template_input: UltralyticsPredict
+  attributes:
+    draw_confidence: True
+    draw_classification_label: True
+    draw_extra_labels: false
+    text_box_to_border_offset: 0.025

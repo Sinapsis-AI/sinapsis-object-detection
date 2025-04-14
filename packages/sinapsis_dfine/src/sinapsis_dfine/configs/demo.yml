@@ -1,0 +1,26 @@
+agent:
+  name: dfine_demo
+  description: "Agent that runs inferences on images using the gradio interface"
+
+templates:
+  - template_name: InputTemplate
+    class_name: InputTemplate
+    attributes: {}
+
+  - template_name: DFINEInference
+    class_name: DFINEInference
+    template_input: InputTemplate
+    attributes:
+      threshold: 0.5
+      config_file: artifacts/configs/dfine/dfine_hgnetv2_n_coco.yml
+      device: cuda
+      pretrained_model:
+        size: n
+        variant: coco
+
+  - template_name: BBoxDrawer
+    class_name: BBoxDrawer
+    template_input: DFINEInference
+    attributes:
+      overwrite: true
+      randomized_color: false

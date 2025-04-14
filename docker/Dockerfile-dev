@@ -1,0 +1,10 @@
+FROM sinapsis-nvidia:base
+
+COPY . /app/
+WORKDIR /app
+RUN uv sync --frozen
+RUN uv build && uv build --all-packages
+RUN uv pip install dist/sinapsis_dfine-0.1.2-py3-none-any.whl[all]
+RUN uv pip install dist/sinapsis_rfdetr-0.1.1-py3-none-any.whl[all]
+RUN uv pip install dist/sinapsis_ultralytics-0.1.2-py3-none-any.whl[all]
+RUN uv pip install dist/sinapsis_object_detection-0.3.0-py3-none-any.whl[all]

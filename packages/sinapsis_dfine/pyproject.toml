@@ -1,7 +1,7 @@
 [project]
-name = "sinapsis-object-detection"
-version = "0.3.0"
-description = "Mono repo with packages for inference and training with object detection models"
+name = "sinapsis-dfine"
+version = "0.1.2"
+description = "Training and inference templates based on the D-FINE architecture."
 authors = [
     {name = "SinapsisAI", email = "dev@sinapsis.tech"},
 ]
@@ -9,28 +9,38 @@ readme = "README.md"
 license = {file = "LICENSE"}
 requires-python = ">=3.10"
 dependencies = [
+    "dfine>=0.1.0",
+    "huggingface-hub>=0.29.3",
+    "opencv-python-headless>=4.11.0.86",
     "sinapsis>=0.1.1",
+    "sinapsis-generic-data-tools>=0.1.1",
 ]
 
-[[tool.uv.index]]
-url = "https://pypi.sinapsis.tech/"
+[project.optional-dependencies]
 
+
+
+sinapsis-data-readers = [
+    "sinapsis-data-readers>=0.1.1",
+]
+sinapsis-data-visualization = [
+    "sinapsis-data-visualization[all]>=0.1.0",
+]
+sinapsis-data-writers = [
+    "sinapsis-data-writers>=0.1.1",
+]
+all = [
+    "sinapsis-dfine[sinapsis-data-readers,sinapsis-data-visualization,sinapsis-data-writers,training]",
+]
+
+training = [
+    "dfine[training]>=0.1.0",
+]
 
 [dependency-groups]
 dev = [
     "ruff>=0.8.3",
     "pre-commit>=4.0.1",
-]
-
-[project.optional-dependencies]
-all = [
-    "sinapsis-dfine[all]",
-    "sinapsis-object-detection[gradio-app]",
-    "sinapsis-rfdetr[all]",
-    "sinapsis-ultralytics[all]",
-]
-gradio-app = [
-    "sinapsis[webapp]>=0.2.2",
 ]
 
 [tool.ruff]
@@ -59,24 +69,19 @@ lint.ignore = ["ANN401"]
 line-length = 120
 show-fixes = true
 
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+
 [[tool.uv.index]]
 name = "sinapsis"
 url = "https://pypi.sinapsis.tech/"
 
-
-[tool.uv.workspace]
-members = ["packages/*"]
-exclude = ["packages/*.egg-info"]
-
-[tool.setuptools]
-packages = { find = { where = ["packages"] } }
-
-
 [tool.uv.sources]
-sinapsis-rfdetr = { workspace = true }
 sinapsis-dfine = { workspace = true }
-sinapsis-ultralytics = { workspace = true }
-sinapsis-object-detection = { workspace = true }
+
 
 
 [project.urls]

@@ -1,0 +1,41 @@
+agent:
+  name: detect_predict
+  description: agent to run inference on an image using a detection model with Ultralytics
+
+templates:
+- template_name: InputTemplate-1
+  class_name: InputTemplate
+  attributes: { }
+
+- template_name: FolderImageDatasetCV2
+  class_name: FolderImageDatasetCV2
+  template_input: InputTemplate-1
+  attributes:
+    data_dir: /home/cv/Pictures/dogs
+
+
+- template_name: UltralyticsPredict
+  class_name: UltralyticsPredict
+  template_input: FolderImageDatasetCV2
+  attributes:
+    model_class: YOLO
+    model: yolo11s.pt
+    task: detect
+    verbose: 0
+    predict_params: {}
+
+- template_name: BBoxDrawer
+  class_name: BBoxDrawer
+  template_input: UltralyticsPredict
+  attributes:
+    draw_confidence: True
+    draw_classification_label: False
+    overwrite: False
+
+- template_name: ImageSaver
+  class_name: ImageSaver
+  template_input: BBoxDrawer
+  attributes:
+    root_dir: ultralytics
+    save_dir: output_2
+    extension: png

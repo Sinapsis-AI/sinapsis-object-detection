@@ -1,0 +1,25 @@
+agent:
+  name: segment_train
+  description: agent to train a segmentation model with Ultralytics
+
+
+templates:
+- template_name: InputTemplate-1
+  class_name: InputTemplate
+  attributes: {}
+
+- template_name: UltralyticsTrain
+  class_name: UltralyticsTrain
+  template_input: InputTemplate-1
+  attributes:
+    model_class: YOLO
+    model: yolo11n-seg
+    task: segment
+    verbose: 0
+    device: [0]
+    training_params:
+      data: coco8-seg.yaml
+      epochs: 2
+      imgsz: 128
+      batch: 32
+      device: 0

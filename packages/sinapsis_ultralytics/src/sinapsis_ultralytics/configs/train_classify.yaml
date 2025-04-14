@@ -1,0 +1,25 @@
+agent:
+  name: classify_train
+  description: agent to train a classification model with Ultralytics
+
+
+templates:
+- template_name: InputTemplate-1
+  class_name: InputTemplate
+  attributes: {}
+
+- template_name: UltralyticsTrain
+  class_name: UltralyticsTrain
+  template_input: InputTemplate-1
+  attributes:
+    model_class: YOLO
+    model: yolo11n-cls
+    task: classify
+    verbose: 0
+    device: [0]
+    training_params:
+      data: cifar10
+      epochs: 2
+      imgsz: 128
+      batch: 32
+      device: 0
