@@ -7,16 +7,9 @@ templates:
   class_name: InputTemplate
   attributes: { }
 
-- template_name: FolderImageDatasetCV2
-  class_name: FolderImageDatasetCV2
-  template_input: InputTemplate-1
-  attributes:
-    data_dir: /home/cv/Pictures/dogs
-
-
 - template_name: UltralyticsPredict
   class_name: UltralyticsPredict
-  template_input: FolderImageDatasetCV2
+  template_input: InputTemplate
   attributes:
     model_class: YOLO
     model: yolo11s.pt
