@@ -31,11 +31,3 @@ templates:
     draw_confidence: True
     draw_classification_label: False
     overwrite: False
-
-- template_name: ImageSaver
-  class_name: ImageSaver
-  template_input: BBoxDrawer
-  attributes:
-    root_dir: ultralytics
-    save_dir: output_2
-    extension: png
