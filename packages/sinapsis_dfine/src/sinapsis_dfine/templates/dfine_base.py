@@ -4,8 +4,8 @@ import os
 from typing import Literal
 
 from pydantic.dataclasses import dataclass
-from sinapsis_core.template_base import (
-    Template,
+from sinapsis_core.template_base import Template
+from sinapsis_core.template_base.base_models import (
     TemplateAttributes,
     TemplateAttributeType,
 )

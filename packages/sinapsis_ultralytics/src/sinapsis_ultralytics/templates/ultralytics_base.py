@@ -4,8 +4,8 @@ from os import makedirs, path
 from pathlib import Path
 from typing import Any, Literal
 
-from sinapsis_core.template_base import (
-    Template,
+from sinapsis_core.template_base import Template
+from sinapsis_core.template_base.base_models import (
     TemplateAttributes,
     TemplateAttributeType,
 )

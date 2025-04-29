@@ -5,8 +5,8 @@ from typing import Literal
 import rfdetr
 from pydantic import Field
 from rfdetr.config import RFDETRBaseConfig, RFDETRLargeConfig
-from sinapsis_core.template_base import (
-    Template,
+from sinapsis_core.template_base import Template
+from sinapsis_core.template_base.base_models import (
     TemplateAttributes,
     TemplateAttributeType,
 )

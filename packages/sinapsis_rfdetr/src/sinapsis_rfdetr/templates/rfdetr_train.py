@@ -5,7 +5,7 @@ import pandas as pd
 from pydantic import Field
 from rfdetr.config import TrainConfig
 from sinapsis_core.data_containers.data_packet import DataContainer
-from sinapsis_core.template_base import (
+from sinapsis_core.template_base.base_models import (
     TemplateAttributeType,
 )
 

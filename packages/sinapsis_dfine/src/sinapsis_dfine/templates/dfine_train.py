@@ -11,7 +11,7 @@ from dfine.misc import dist_utils
 from dfine.solver import DetSolver
 from pydantic.dataclasses import dataclass
 from sinapsis_core.data_containers.data_packet import DataContainer
-from sinapsis_core.template_base import TemplateAttributeType
+from sinapsis_core.template_base.base_models import TemplateAttributeType
 from sinapsis_generic_data_tools.helpers.file_downloader import download_file
 
 from sinapsis_dfine.templates.dfine_base import DFINEBase, DFINEBaseAttributes

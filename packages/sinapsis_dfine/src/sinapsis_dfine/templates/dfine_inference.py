@@ -11,7 +11,7 @@ from sinapsis_core.data_containers.data_packet import (
     ImageColor,
     ImagePacket,
 )
-from sinapsis_core.template_base import TemplateAttributeType
+from sinapsis_core.template_base.base_models import TemplateAttributeType
 from sinapsis_data_visualization.helpers.detection_utils import bbox_xyxy_to_xywh
 
 from sinapsis_dfine.helpers.load_labels import coco_id2label, objects365_id2label
