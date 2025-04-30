@@ -1,12 +1,12 @@
 [project]
 name = "sinapsis-object-detection"
-version = "0.3.0"
+version = "0.3.2"
 description = "Mono repo with packages for inference and training with object detection models"
 authors = [
     {name = "SinapsisAI", email = "dev@sinapsis.tech"},
 ]
 readme = "README.md"
-license = {file = "LICENSE"}
+license-files = ["LICENSE"]
 requires-python = ">=3.10"
 dependencies = [
     "sinapsis>=0.1.1",

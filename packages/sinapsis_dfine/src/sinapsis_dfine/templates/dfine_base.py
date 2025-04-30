@@ -6,8 +6,10 @@ from typing import Literal
 from pydantic.dataclasses import dataclass
 from sinapsis_core.template_base import Template
 from sinapsis_core.template_base.base_models import (
+    OutputTypes,
     TemplateAttributes,
     TemplateAttributeType,
+    UIPropertiesMetadata,
 )
 from sinapsis_core.utils.env_var_keys import SINAPSIS_CACHE_DIR
 from sinapsis_generic_data_tools.helpers.file_downloader import download_file
@@ -63,7 +65,7 @@ class DFINEBase(Template):
     """
 
     AttributesBaseModel = DFINEBaseAttributes
-    CATEGORY = "D-FINE"
+    UIProperties = UIPropertiesMetadata(category="D-FINE", output_type=OutputTypes.IMAGE)
     SUPPORTED_VARIANTS = ("coco", "obj365")
     SUPPORTED_SIZES = ("n", "s", "m", "l", "x")
     SUPPORTED_HGNET_BACKBONES = ("B0", "B1", "B2", "B3", "B4", "B5", "B6")

@@ -6,8 +6,10 @@ from typing import Any, Literal
 
 from sinapsis_core.template_base import Template
 from sinapsis_core.template_base.base_models import (
+    OutputTypes,
     TemplateAttributes,
     TemplateAttributeType,
+    UIPropertiesMetadata,
 )
 from sinapsis_core.utils.env_var_keys import SINAPSIS_CACHE_DIR
 from ultralytics import models, settings
@@ -23,7 +25,7 @@ class UltralyticsBase(Template):
     operations.
     """
 
-    CATEGORY = "Ultralytics"
+    UIProperties = UIPropertiesMetadata(category="Ultralytics", output_type=OutputTypes.IMAGE)
 
     class AttributesBaseModel(TemplateAttributes):
         """

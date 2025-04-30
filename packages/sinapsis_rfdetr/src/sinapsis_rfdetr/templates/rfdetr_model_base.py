@@ -7,8 +7,10 @@ from pydantic import Field
 from rfdetr.config import RFDETRBaseConfig, RFDETRLargeConfig
 from sinapsis_core.template_base import Template
 from sinapsis_core.template_base.base_models import (
+    OutputTypes,
     TemplateAttributes,
     TemplateAttributeType,
+    UIPropertiesMetadata,
 )
 from sinapsis_core.utils.env_var_keys import SINAPSIS_CACHE_DIR
 
@@ -23,6 +25,7 @@ class RFDETRModelBase(Template):
     """
 
     MODEL_CLASS: Literal["RFDETRBase", "RFDETRLarge"] = "RFDETRBase"
+    UIProperties = UIPropertiesMetadata(category="RFDetr", output_type=OutputTypes.IMAGE)
 
     class AttributesBaseModel(TemplateAttributes):
         """
