@@ -4,6 +4,7 @@ from os import makedirs, path
 from pathlib import Path
 from typing import Any, Literal
 
+import torch
 from sinapsis_core.template_base import Template
 from sinapsis_core.template_base.base_models import (
     OutputTypes,
@@ -11,9 +12,11 @@ from sinapsis_core.template_base.base_models import (
     TemplateAttributeType,
     UIPropertiesMetadata,
 )
-from sinapsis_core.utils.env_var_keys import SINAPSIS_CACHE_DIR
+from sinapsis_core.utils.env_var_keys import WORKING_DIR
 from ultralytics import models, settings
 from ultralytics.utils.files import WorkingDirectory
+
+from sinapsis_ultralytics.helpers.tags import Tags
 
 
 class UltralyticsBase(Template):
@@ -25,7 +28,11 @@ class UltralyticsBase(Template):
     operations.
     """
 
-    UIProperties = UIPropertiesMetadata(category="Ultralytics", output_type=OutputTypes.IMAGE)
+    UIProperties = UIPropertiesMetadata(
+        category="Ultralytics",
+        output_type=OutputTypes.IMAGE,
+        tags=[Tags.IMAGE, Tags.MODELS, Tags.OBJECT_DETECTION, Tags.ULTRALYTICS],
+    )
 
     class AttributesBaseModel(TemplateAttributes):
         """
@@ -40,7 +47,7 @@ class UltralyticsBase(Template):
                 to None.
             verbose (bool): Whether to print verbose logs. Defaults to False.
             working_dir (str | Path): The working directory for ultralytics. Ultralytics default models are
-                downloaded to this directory. Defaults to SINAPSIS_CACHE_DIR/ultralytics.
+                downloaded to this directory. Defaults to WORKING_DIR/ultralytics.
             datasets_dir (str | Path): The directory where the datasets are located. Ultralytics datasets are
                 downloaded to this directory. Defaults to working_dir/datasets.
             runs_dir (str | Path): The directory where the training experiment artifacts are saved.
@@ -53,7 +60,7 @@ class UltralyticsBase(Template):
         model: str | Path
         task: Literal["classify", "detect", "segment", "pose", "obb"] | None = None
         verbose: bool = False
-        working_dir: str | Path = path.join(SINAPSIS_CACHE_DIR, "ultralytics")
+        working_dir: str | Path = path.join(WORKING_DIR, "ultralytics")
         datasets_dir: str | Path = path.join(working_dir, "datasets")
         runs_dir: str | Path = path.join(working_dir, "runs")
         checkpoint_path: str | Path | None = None
@@ -110,3 +117,8 @@ class UltralyticsBase(Template):
             f"Loading from checkpoint: {self.attributes.checkpoint_path}",
         )
         self.model.load(self.attributes.checkpoint_path)
+
+    def reset_state(self, template_name: str | None = None) -> None:
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        super().reset_state(template_name)

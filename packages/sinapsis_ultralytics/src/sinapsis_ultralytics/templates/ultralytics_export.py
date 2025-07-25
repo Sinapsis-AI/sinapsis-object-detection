@@ -2,10 +2,14 @@
 
 from pydantic import Field
 from sinapsis_core.data_containers.data_packet import DataContainer
-from sinapsis_core.utils.env_var_keys import SINAPSIS_CACHE_DIR
+from sinapsis_core.utils.env_var_keys import WORKING_DIR
 from ultralytics.utils.files import WorkingDirectory
 
+from sinapsis_ultralytics.helpers.tags import Tags
 from sinapsis_ultralytics.templates.ultralytics_base import UltralyticsBase
+
+UltralyticsExportUIProperties = UltralyticsBase.UIProperties
+UltralyticsExportUIProperties.tags.extend([Tags.EXPORT, Tags.ONNX, Tags.TENSORFLOW, Tags.TENSORRT])
 
 
 class UltralyticsExport(UltralyticsBase):
@@ -43,6 +47,8 @@ class UltralyticsExport(UltralyticsBase):
 
     """
 
+    UIProperties = UltralyticsExportUIProperties
+
     class AttributesBaseModel(UltralyticsBase.AttributesBaseModel):
         """
         Attributes for Ultralytics Export Template
@@ -59,7 +65,7 @@ class UltralyticsExport(UltralyticsBase):
         export_params: dict = Field(default_factory=dict)
 
     def execute(self, container: DataContainer) -> DataContainer:
-        with WorkingDirectory(SINAPSIS_CACHE_DIR):
+        with WorkingDirectory(WORKING_DIR):
             exported_path = self.model.export(**self.attributes.export_params)
             self.logger.info(f"Model exported to {exported_path}")
 

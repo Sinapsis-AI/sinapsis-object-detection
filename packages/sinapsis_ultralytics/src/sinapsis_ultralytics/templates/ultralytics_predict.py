@@ -7,10 +7,16 @@ from sinapsis_core.data_containers.data_packet import DataContainer, ImagePacket
 from ultralytics import models
 from ultralytics.engine.results import Results
 
+from sinapsis_ultralytics.helpers.tags import Tags
 from sinapsis_ultralytics.helpers.ultralytics_predict_helpers import (
     get_annotations_from_ultralytics_result,
 )
 from sinapsis_ultralytics.templates.ultralytics_base import UltralyticsBase
+
+UltralyticsPredictUIProperties = UltralyticsBase.UIProperties
+UltralyticsPredictUIProperties.tags.extend(
+    [Tags.INFERENCE, Tags.PREDICTION, Tags.CLASSIFICATION, Tags.DETECTION, Tags.OBBS, Tags.SEGMENTATION]
+)
 
 
 class UltralyticsPredict(UltralyticsBase):
@@ -31,6 +37,8 @@ class UltralyticsPredict(UltralyticsBase):
         task: classify
         verbose: 0
     """
+
+    UIProperties = UltralyticsPredictUIProperties
 
     class AttributesBaseModel(UltralyticsBase.AttributesBaseModel):
         """

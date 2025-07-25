@@ -3,6 +3,7 @@
 import os
 from typing import Literal
 
+import torch
 from pydantic.dataclasses import dataclass
 from sinapsis_core.template_base import Template
 from sinapsis_core.template_base.base_models import (
@@ -13,6 +14,8 @@ from sinapsis_core.template_base.base_models import (
 )
 from sinapsis_core.utils.env_var_keys import SINAPSIS_CACHE_DIR
 from sinapsis_generic_data_tools.helpers.file_downloader import download_file
+
+from sinapsis_dfine.helpers.tags import Tags
 
 
 @dataclass(frozen=True)
@@ -65,7 +68,11 @@ class DFINEBase(Template):
     """
 
     AttributesBaseModel = DFINEBaseAttributes
-    UIProperties = UIPropertiesMetadata(category="D-FINE", output_type=OutputTypes.IMAGE)
+    UIProperties = UIPropertiesMetadata(
+        category="D-FINE",
+        output_type=OutputTypes.IMAGE,
+        tags=[Tags.DFINE, Tags.IMAGE, Tags.INFERENCE, Tags.MODELS, Tags.TRAINING, Tags.OBJECT_DETECTION],
+    )
     SUPPORTED_VARIANTS = ("coco", "obj365")
     SUPPORTED_SIZES = ("n", "s", "m", "l", "x")
     SUPPORTED_HGNET_BACKBONES = ("B0", "B1", "B2", "B3", "B4", "B5", "B6")
@@ -125,3 +132,8 @@ class DFINEBase(Template):
         download_file(dfine_weights_url, dfine_weights_path, f"D-FINE {model_variant.upper()} weights ({model_size})")
 
         return dfine_weights_path
+
+    def reset_state(self, template_name: str | None = None) -> None:
+        if self.attributes.device == "cuda":
+            torch.cuda.empty_cache()
+        super().reset_state(template_name)

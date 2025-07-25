@@ -4,7 +4,11 @@ from pydantic import Field
 from sinapsis_core.data_containers.data_packet import DataContainer
 from ultralytics.utils.files import WorkingDirectory
 
+from sinapsis_ultralytics.helpers.tags import Tags
 from sinapsis_ultralytics.templates.ultralytics_base import UltralyticsBase
+
+UltralyticsTrainUIProperties = UltralyticsBase.UIProperties
+UltralyticsTrainUIProperties.tags.extend([Tags.DATASET, Tags.TRAINING])
 
 
 class UltralyticsTrain(UltralyticsBase):
@@ -40,6 +44,8 @@ class UltralyticsTrain(UltralyticsBase):
 
     """
 
+    UIProperties = UltralyticsTrainUIProperties
+
     class AttributesBaseModel(UltralyticsBase.AttributesBaseModel):
         """
         Attributes for UltralyticsTrain Template
@@ -69,8 +75,8 @@ class UltralyticsTrain(UltralyticsBase):
 
             # Store the model's metrics and the trained model's directory path
             model_info = {
-                "metrics": self.model.metrics,
-                "trained_model_path": trained_model.save_dir,
+                "metrics": self.model.metrics.to_df(),
+                "trained_model_path": str(trained_model.save_dir),
             }
             self._set_generic_data(container, model_info)
 

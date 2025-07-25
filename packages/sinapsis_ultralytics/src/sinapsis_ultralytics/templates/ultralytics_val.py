@@ -4,7 +4,11 @@ from pydantic import Field
 from sinapsis_core.data_containers.data_packet import DataContainer
 from ultralytics.utils.files import WorkingDirectory
 
+from sinapsis_ultralytics.helpers.tags import Tags
 from sinapsis_ultralytics.templates.ultralytics_base import UltralyticsBase
+
+UltralyticsValUIProperties = UltralyticsBase.UIProperties
+UltralyticsValUIProperties.tags.extend([Tags.DATASET, Tags.TRAINING, Tags.VALIDATION, Tags.METRICS])
 
 
 class UltralyticsVal(UltralyticsBase):
@@ -31,6 +35,8 @@ class UltralyticsVal(UltralyticsBase):
           batch: 16
 
     """
+
+    UIProperties = UltralyticsValUIProperties
 
     class AttributesBaseModel(UltralyticsBase.AttributesBaseModel):
         """

@@ -3,6 +3,7 @@ from os import path
 from typing import Literal
 
 import rfdetr
+import torch
 from pydantic import Field
 from rfdetr.config import RFDETRBaseConfig, RFDETRLargeConfig
 from sinapsis_core.template_base import Template
@@ -15,6 +16,7 @@ from sinapsis_core.template_base.base_models import (
 from sinapsis_core.utils.env_var_keys import SINAPSIS_CACHE_DIR
 
 from sinapsis_rfdetr.helpers.rfdetr_helpers import RFDETRKeys
+from sinapsis_rfdetr.helpers.tags import Tags
 
 
 class RFDETRModelBase(Template):
@@ -25,7 +27,11 @@ class RFDETRModelBase(Template):
     """
 
     MODEL_CLASS: Literal["RFDETRBase", "RFDETRLarge"] = "RFDETRBase"
-    UIProperties = UIPropertiesMetadata(category="RFDetr", output_type=OutputTypes.IMAGE)
+    UIProperties = UIPropertiesMetadata(
+        category="RFDetr",
+        output_type=OutputTypes.IMAGE,
+        tags=[Tags.IMAGE, Tags.MODELS, Tags.RFDETR, Tags.OBJECT_DETECTION],
+    )
 
     class AttributesBaseModel(TemplateAttributes):
         """
@@ -95,6 +101,11 @@ class RFDETRModelBase(Template):
         model_instance = model_class(**model_params)
 
         return model_instance
+
+    def reset_state(self, template_name: str | None = None) -> None:
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        super().reset_state(template_name)
 
 
 class RFDETRModelLarge(RFDETRModelBase):

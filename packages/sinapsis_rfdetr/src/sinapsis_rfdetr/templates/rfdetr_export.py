@@ -6,7 +6,11 @@ from sinapsis_core.template_base.base_models import (
 )
 
 from sinapsis_rfdetr.helpers.rfdetr_helpers import initialize_output_dir
+from sinapsis_rfdetr.helpers.tags import Tags
 from sinapsis_rfdetr.templates.rfdetr_model_base import RFDETRModelBase, RFDETRModelLarge
+
+RFDETRExportUIProperties = RFDETRModelBase.UIProperties
+RFDETRExportUIProperties.tags.extend([Tags.ONNX, Tags.EXPORT])
 
 
 class RFDETRExport(RFDETRModelBase):
@@ -32,6 +36,8 @@ class RFDETRExport(RFDETRModelBase):
             export_params:
                 output_dir: 'path/to/save/export/model'
     """
+
+    UIProperties = RFDETRExportUIProperties
 
     class AttributesBaseModel(RFDETRModelBase.AttributesBaseModel):
         """

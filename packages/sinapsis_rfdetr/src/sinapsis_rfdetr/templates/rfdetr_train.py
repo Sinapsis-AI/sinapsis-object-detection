@@ -10,7 +10,11 @@ from sinapsis_core.template_base.base_models import (
 )
 
 from sinapsis_rfdetr.helpers.rfdetr_helpers import RFDETRKeys, initialize_output_dir
+from sinapsis_rfdetr.helpers.tags import Tags
 from sinapsis_rfdetr.templates.rfdetr_model_base import RFDETRModelBase, RFDETRModelLarge
+
+RFDETRTrainUIProperties = RFDETRModelBase.UIProperties
+RFDETRTrainUIProperties.tags.extend([Tags.TRAINING])
 
 
 class RFDETRTrain(RFDETRModelBase):
@@ -38,6 +42,8 @@ class RFDETRTrain(RFDETRModelBase):
                 early_stopping: True
                 resume: 'path/to/checkpoint'
     """
+
+    UIProperties = RFDETRTrainUIProperties
 
     class AttributesBaseModel(RFDETRModelBase.AttributesBaseModel):
         """

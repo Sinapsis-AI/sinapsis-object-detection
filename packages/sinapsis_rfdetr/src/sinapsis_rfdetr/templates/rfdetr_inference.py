@@ -2,7 +2,11 @@
 from sinapsis_core.data_containers.data_packet import DataContainer
 
 from sinapsis_rfdetr.helpers.rfdetr_helpers import get_annotations
+from sinapsis_rfdetr.helpers.tags import Tags
 from sinapsis_rfdetr.templates.rfdetr_model_base import RFDETRModelBase, RFDETRModelLarge
+
+RFDETRInferenceUIProperties = RFDETRModelBase.UIProperties
+RFDETRInferenceUIProperties.tags.extend([Tags.INFERENCE])
 
 
 class RFDETRInference(RFDETRModelBase):
@@ -30,6 +34,8 @@ class RFDETRInference(RFDETRModelBase):
                 resolution: 560
                 pretrain_weights: 'path/to/checkpoint'
     """
+
+    UIProperties = RFDETRInferenceUIProperties
 
     class AttributesBaseModel(RFDETRModelBase.AttributesBaseModel):
         """
