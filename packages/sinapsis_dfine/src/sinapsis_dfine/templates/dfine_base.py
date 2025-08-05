@@ -3,7 +3,6 @@
 import os
 from typing import Literal
 
-import torch
 from pydantic.dataclasses import dataclass
 from sinapsis_core.template_base import Template
 from sinapsis_core.template_base.base_models import (
@@ -17,6 +16,7 @@ from sinapsis_generic_data_tools.helpers.file_downloader import download_file
 
 from sinapsis_dfine.helpers.tags import Tags
 
+import torch
 
 @dataclass(frozen=True)
 class DFINEKeys:
@@ -132,7 +132,6 @@ class DFINEBase(Template):
         download_file(dfine_weights_url, dfine_weights_path, f"D-FINE {model_variant.upper()} weights ({model_size})")
 
         return dfine_weights_path
-
     def reset_state(self, template_name: str | None = None) -> None:
         if self.attributes.device == "cuda":
             torch.cuda.empty_cache()

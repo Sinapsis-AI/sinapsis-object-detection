@@ -1,6 +1,6 @@
 [project]
 name = "sinapsis-object-detection"
-version = "0.3.5"
+version = "0.3.6"
 description = "Mono repo with packages for inference and training with object detection models"
 authors = [
     {name = "SinapsisAI", email = "dev@sinapsis.tech"},

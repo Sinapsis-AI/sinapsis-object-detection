@@ -1,6 +1,6 @@
 [project]
 name = "sinapsis-dfine"
-version = "0.1.7"
+version = "0.1.8"
 description = "Training and inference templates based on the D-FINE architecture."
 authors = [
     {name = "SinapsisAI", email = "dev@sinapsis.tech"},

@@ -19,7 +19,7 @@ def create_demo() -> gr.Blocks:
     """
     with gr.Blocks(css=css_header(), title="Sinapsis Object Detection") as demo:
         add_logo_and_title("Sinapsis Object Detection")
-        init_image_inference(CONFIG_PATH, app_message="""Detect objects in images using state-of-the-art models.""")
+        init_image_inference(CONFIG_PATH, stream=True, app_message="""Detect objects in images using state-of-the-art models.""")
 
     return demo
 
