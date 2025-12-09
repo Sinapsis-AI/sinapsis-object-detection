@@ -75,10 +75,10 @@ This repository is organized into modular packages, each built for integration w
 <details>
 <summary id="uv"><strong><span style="font-size: 1.4em;">Sinapsis D-FINE</span></strong></summary>
 
-The package provides templates for **training** and **inference** with the D-FINE model, enabling advanced **object detection** tasks. It includes:
+The package provides templates for **fine-tuning** and **inference** with the D-FINE model, enabling advanced **object detection** tasks. It includes:
 
-- **DFINETraining**: A template that implements the training pipeline for the D-FINE model, including logic for initializing configurations, downloading weights, and setting up the training solver.
-- **DFINEInference**: A template designed for performing inference on a set of images using the different D-FINE architectures available.
+- **DFINETraining**: A highly flexible template for fine-tuning D-FINE models on custom data.
+- **DFINEInference**: A streamlined and efficient template for running trained D-FINE models.
 
 For specific instructions and further details, see the [README.md](https://github.com/Sinapsis-AI/sinapsis-object-detection/blob/main/packages/sinapsis_dfine/README.md).
 

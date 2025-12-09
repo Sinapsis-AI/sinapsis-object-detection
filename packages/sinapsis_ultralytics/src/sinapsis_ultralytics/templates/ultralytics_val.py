@@ -4,6 +4,7 @@ from pydantic import Field
 from sinapsis_core.data_containers.data_packet import DataContainer
 from ultralytics.utils.files import WorkingDirectory
 
+from sinapsis_ultralytics.helpers.params import ValidationParams
 from sinapsis_ultralytics.helpers.tags import Tags
 from sinapsis_ultralytics.templates.ultralytics_base import UltralyticsBase
 
@@ -43,13 +44,13 @@ class UltralyticsVal(UltralyticsBase):
         Attributes for UltralyticsVal Template
 
         Args:
-            validation_params (dict[str, Any]): A dictionary containing the validation parameters for the Ultralytics
-            model. If not specified, default parameters will be used.
+            validation_params (ValidationParams): ValidationParams containing the validation parameters for the
+            Ultralytics model. If not specified, default parameters will be used.
             The full documentation for available validation parameters can be found in the Ultralytics docs:
             https://docs.ultralytics.com/modes/val/#arguments-for-yolo-model-validation
         """
 
-        validation_params: dict = Field(default_factory=dict)
+        validation_params: ValidationParams = Field(default_factory=ValidationParams)
 
     def execute(self, container: DataContainer) -> DataContainer:
         """
@@ -62,7 +63,7 @@ class UltralyticsVal(UltralyticsBase):
             DataContainer: The container with updated metrics and model path after validation.
         """
         with WorkingDirectory(self.attributes.working_dir):
-            validation_results = self.model.val(**self.attributes.validation_params)
+            validation_results = self.model.val(**self.attributes.validation_params.model_dump())
 
             model_info = {
                 "metrics": validation_results,

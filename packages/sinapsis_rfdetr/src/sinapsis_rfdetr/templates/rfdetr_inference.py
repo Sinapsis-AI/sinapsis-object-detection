@@ -51,6 +51,15 @@ class RFDETRInference(RFDETRModelBase):
         annotations_path: str = ""
         threshold: float = 0.5
 
+    def initialize(self) -> None:
+        """Initializes the template's common state for creation or reset.
+
+        This method is called by both `__init__` and `reset_state` to ensure
+        a consistent state. Can be overriden by subclasses for specific behaviour.
+        """
+        super().initialize()
+        self.model.optimize_for_inference()
+
     def process_images(self, container: DataContainer) -> None:
         """
         Processes all images in the provided `DataContainer` by running inference and storing the results.

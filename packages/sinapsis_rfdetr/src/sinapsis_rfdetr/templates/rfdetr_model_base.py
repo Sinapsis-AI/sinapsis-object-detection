@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import gc
 from os import path
 from typing import Literal
 
@@ -61,11 +62,19 @@ class RFDETRModelBase(Template):
             https://github.com/roboflow/rf-detr/blob/main/rfdetr/config.py
         """
 
-        model_params: RFDETRBaseConfig = Field(default_factory=dict)  # type: ignore[arg-type]
+        model_params: RFDETRBaseConfig = Field(default_factory=RFDETRBaseConfig)  # type: ignore[arg-type]
 
     def __init__(self, attributes: TemplateAttributeType) -> None:
         """Initializes the RF-DETR templates with the given attributes."""
         super().__init__(attributes)
+        self.initialize()
+
+    def initialize(self) -> None:
+        """Initializes the template's common state for creation or reset.
+
+        This method is called by both `__init__` and `reset_state` to ensure
+        a consistent state. Can be overriden by subclasses for specific behaviour.
+        """
         self._check_pretrained_path()
         self.model = self._initialize_model()
 
@@ -103,9 +112,31 @@ class RFDETRModelBase(Template):
         return model_instance
 
     def reset_state(self, template_name: str | None = None) -> None:
+        """Releases the heavy resources from memory and re-instantiates the template.
+
+        Args:
+            template_name (str | None, optional): The name of the template instance being reset. Defaults to None.
+        """
+        _ = template_name
+
+        if hasattr(self, "model") and self.model is not None:
+            if hasattr(self.model, "model") and isinstance(self.model.model, torch.nn.Module):
+                self.model.model.to("cpu")
+
+            if hasattr(self.model, "inference_model") and isinstance(self.model.inference_model, torch.nn.Module):
+                self.model.inference_model.to("cpu")
+
+            if hasattr(self.model, "postprocessors") and self.model.postprocessors.get("bbox") is not None:
+                self.model.postprocessors["bbox"].to("cpu")
+
+            del self.model
+
+        gc.collect()
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
-        super().reset_state(template_name)
+
+        self.initialize()
+        self.logger.info(f"Reset template instance `{self.instance_name}`")
 
 
 class RFDETRModelLarge(RFDETRModelBase):
@@ -145,4 +176,4 @@ class RFDETRModelLarge(RFDETRModelBase):
             https://github.com/roboflow/rf-detr/blob/main/rfdetr/config.py
         """
 
-        model_params: RFDETRLargeConfig | dict = Field(default_factory=dict)  # type: ignore[arg-type]
+        model_params: RFDETRLargeConfig = Field(default_factory=RFDETRLargeConfig)  # type: ignore[arg-type]

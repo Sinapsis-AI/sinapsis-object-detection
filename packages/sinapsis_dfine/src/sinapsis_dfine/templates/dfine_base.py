@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-
-import os
+import gc
+from abc import abstractmethod
 from typing import Literal
 
-from pydantic.dataclasses import dataclass
+import torch
 from sinapsis_core.template_base import Template
 from sinapsis_core.template_base.base_models import (
     OutputTypes,
@@ -12,59 +12,40 @@ from sinapsis_core.template_base.base_models import (
     UIPropertiesMetadata,
 )
 from sinapsis_core.utils.env_var_keys import SINAPSIS_CACHE_DIR
-from sinapsis_generic_data_tools.helpers.file_downloader import download_file
 
+from sinapsis_dfine.helpers.schemas import DFINEKeys
 from sinapsis_dfine.helpers.tags import Tags
-
-import torch
-
-@dataclass(frozen=True)
-class DFINEKeys:
-    """Defines constants used as keys in configurations and updates."""
-
-    CONFIG: str = "config"
-    RESUME: str = "resume"
-    TUNING: str = "tuning"
-    SEED: str = "seed"
-    USE_AMP: str = "use_amp"
-    OUTPUT_DIR: str = "output_dir"
-    DEVICE: str = "device"
-    HGNET_V2: str = "HGNetv2"
 
 
 class DFINEBaseAttributes(TemplateAttributes):
-    """Defines the general attributes required for D-FINE workflows.
+    """Defines common configuration attributes for D-FINE templates.
 
     Attributes:
-        config_file (str): Path to the model configuration file. It must be provided and follow
-            the general structure as defined in the original D-FINE repository.
-        pretrained_model (dict | None): Specifies the size and variant of
-            the pretrained model, if any. Defaults to None.
-        device (Literal["cpu", "cuda"]): Device to run the model ('cpu' or 'cuda').
-        weights_path (str | None): Path to custom weights file, if provided. Defaults to None.
-        output_dir (str): Directory for storing outputs and downloaded weights. Defaults to
-            SINAPSIS_CACHE_DIR.
-
+        model_path (str): The model identifier from the Hugging Face Hub or a local path to the
+            model and processor files. Defaults to `"ustc-community/dfine-nano-coco"`.
+        model_cache_dir (str): Directory to cache downloaded model files. Defaults to the path
+            specified by the `SINAPSIS_CACHE_DIR` environment variable.
+        threshold (float): The confidence score threshold (from 0.0 to 1.0) for filtering detections.
+            For inference, it discards all detections below this value from the final output.
+            For training, it is used on the validation dataset to filter predictions before calculating
+            evaluation metrics like mAP.
+        device (Literal["auto", "cuda", "cpu"]): The hardware device to run the model on.
+            Defaults to `"auto"`, which automatically selects `"cuda"` if a compatible GPU
+            is available, otherwise falls back to `"cpu"`.
     """
 
-    config_file: str
-    pretrained_model: dict[Literal["size", "variant"], str] | None = None
-    device: Literal["cpu", "cuda"]
-    weights_path: str | None = None
-    output_dir: str = str(SINAPSIS_CACHE_DIR)
+    model_path: str = "ustc-community/dfine-nano-coco"
+    model_cache_dir: str = str(SINAPSIS_CACHE_DIR)
+    threshold: float
+    device: Literal["auto", "cuda", "cpu"] = "auto"
 
 
 class DFINEBase(Template):
-    """
-    Base class for shared logic in D-FINE Training and Inference workflows.
+    """Abstract base class for D-FINE training and inference templates.
 
-    The template validates that the configuration for the model is correct, and that
-    the model has the correct size and weights to perform both inference and training.
-
-    Raises:
-        ValueError: If one of the attributes is defined incorrectly or missing for the wanted
-            mode.
-        FileNotFoundError: If the config file provided does not exist in the provided path.
+    This class provides shared setup, teardown, and resource management logic.
+    It handles the lifecycle of the model and processor, including initialization
+    and memory cleanup, to ensure a consistent state for subclasses.
     """
 
     AttributesBaseModel = DFINEBaseAttributes
@@ -73,66 +54,75 @@ class DFINEBase(Template):
         output_type=OutputTypes.IMAGE,
         tags=[Tags.DFINE, Tags.IMAGE, Tags.INFERENCE, Tags.MODELS, Tags.TRAINING, Tags.OBJECT_DETECTION],
     )
-    SUPPORTED_VARIANTS = ("coco", "obj365")
-    SUPPORTED_SIZES = ("n", "s", "m", "l", "x")
-    SUPPORTED_HGNET_BACKBONES = ("B0", "B1", "B2", "B3", "B4", "B5", "B6")
-    WEIGHTS_BASE_URL = "https://github.com/Peterande/storage/releases/download/dfinev1.0/"
     KEYS = DFINEKeys()
 
     def __init__(self, attributes: TemplateAttributeType) -> None:
         super().__init__(attributes)
-        if not os.path.exists(self.attributes.output_dir):
-            os.makedirs(self.attributes.output_dir)
-        if not self.attributes.output_dir.endswith("/"):
-            self.attributes.output_dir += "/"
+        self.initialize()
 
-    def _validate_config_file(self) -> None:
-        """Ensures the configuration file exists.
+    def initialize(self) -> None:
+        """Initializes the template's common state for creation or reset.
 
-        Raises:
-            FileNotFoundError: If the configuration file does not exist.
+        This method is called by both `__init__` and `reset_state` to ensure
+        a consistent state. Can be overriden by subclasses for specific behaviour.
         """
-        if not os.path.exists(self.attributes.config_file):
-            raise FileNotFoundError(f"Config file not found: {self.attributes.config_file}")
+        self.device = self._set_device()
 
-    def _validate_pretrained_model(self) -> None:
-        """Validates the pretrained model attributes.
+    def _set_device(self) -> str:
+        """Resolves the processing device based on the user's attribute setting.
 
-        Raises:
-            ValueError: If the model variant or size is unsupported.
-        """
-        model_variant = self.attributes.pretrained_model.get("variant")
-        model_size = self.attributes.pretrained_model.get("size")
-
-        if model_variant not in self.SUPPORTED_VARIANTS:
-            raise ValueError(
-                f"Unsupported pretrained model variant '{model_variant}'. Supported variants: {self.SUPPORTED_VARIANTS}"
-            )
-
-        if model_size not in self.SUPPORTED_SIZES:
-            raise ValueError(
-                f"Unsupported pretrained model size '{model_size}'. Supported sizes: {self.SUPPORTED_SIZES}"
-            )
-
-        if model_variant == "obj365" and model_size == "n":
-            raise ValueError("The 'n' model size is not available for 'obj365' pretrained models.")
-
-    def _download_dfine_weights(self) -> str:
-        """Downloads D-FINE weights based on the pretrained model configuration.
+        If the device attribute is set to `"auto"`, this method checks for CUDA
+        availability and selects the appropriate device. Otherwise, it respects
+        the user's explicit choice of `"cuda"` or `"cpu"`.
 
         Returns:
-            str: Path to the downloaded D-FINE weights.
+            str: The resolved device name, either `"cuda"` or `"cpu"`.
         """
-        model_size = self.attributes.pretrained_model["size"]
-        model_variant = self.attributes.pretrained_model["variant"]
+        if self.attributes.device == "auto":
+            return "cuda" if torch.cuda.is_available() else "cpu"
+        return self.attributes.device
 
-        dfine_weights_filename = f"dfine_{model_size}_{model_variant}.pth"
-        dfine_weights_path = os.path.join(self.attributes.output_dir, dfine_weights_filename)
-        dfine_weights_url = self.WEIGHTS_BASE_URL + dfine_weights_filename
-        download_file(dfine_weights_url, dfine_weights_path, f"D-FINE {model_variant.upper()} weights ({model_size})")
+    @abstractmethod
+    def _initialize_processor(self) -> None:
+        """Abstract method for loading the image processor.
 
-        return dfine_weights_path
+        Subclasses must implement this to load their processor with the corresponding
+        processor arguments.
+        """
+
+    @abstractmethod
+    def _initialize_model(self) -> None:
+        """Abstract method for loading the object detection model.
+
+        Subclasses must implement this to load their specific model with the corresponding
+        model arguments.
+        """
+
+    def _cleanup(self) -> None:
+        """Unloads the model and processor to free up CPU/GPU memory.
+
+        Subclasses can override this method to unload other resources as needed.
+        """
+        if hasattr(self, "model") and self.model is not None:
+            self.model.to("cpu")
+            del self.model
+        if hasattr(self, "processor") and self.processor is not None:
+            del self.processor
+
     def reset_state(self, template_name: str | None = None) -> None:
-        if self.attributes.device == "cuda":
+        """Releases the heavy resources from memory and re-instantiates the template.
+
+        Args:
+            template_name (str | None, optional): The name of the template instance being reset.
+                Defaults to None.
+        """
+        _ = template_name
+
+        self._cleanup()
+
+        gc.collect()
+        if torch.cuda.is_available():
             torch.cuda.empty_cache()
-        super().reset_state(template_name)
+
+        self.initialize()
+        self.logger.info(f"Reset template instance `{self.instance_name}`")

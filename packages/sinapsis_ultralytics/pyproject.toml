@@ -1,6 +1,6 @@
 [project]
 name = "sinapsis-ultralytics"
-version = "0.1.8"
+version = "0.1.12"
 description = "Package to build computer vision applications based on the Ultralytics library"
 authors = [{ name = "SinapsisAI", email = "dev@sinapsis-ai.com" }]
 readme = "README.md"

@@ -1,44 +1,37 @@
 # -*- coding: utf-8 -*-
-from typing import Any, cast
 
-import cv2
 import torch
-import torchvision.transforms as T
-from dfine.core import YAMLConfig
 from sinapsis_core.data_containers.annotations import BoundingBox, ImageAnnotations
 from sinapsis_core.data_containers.data_packet import (
     DataContainer,
-    ImageColor,
     ImagePacket,
 )
-from sinapsis_core.template_base.base_models import TemplateAttributeType
 from sinapsis_data_visualization.helpers.detection_utils import bbox_xyxy_to_xywh
+from transformers import AutoImageProcessor, DFineForObjectDetection
+from transformers.models.d_fine.modeling_d_fine import DFineObjectDetectionOutput
 
-from sinapsis_dfine.helpers.load_labels import coco_id2label, objects365_id2label
 from sinapsis_dfine.templates.dfine_base import DFINEBase, DFINEBaseAttributes
-
-DetectionOutputs = list[tuple[list[list[float]], list[float], list[int]]]
 
 
 class DFINEInferenceAttributes(DFINEBaseAttributes):
-    """Attributes for the D-FINE inference workflow.
+    """Defines configuration attributes for D-FINE inference template.
+
+    Extends the attributes from DFINEBaseAttributes.
 
     Attributes:
-        threshold (float): Confidence score threshold for filtering detections.
-        warmup_iterations (int): Number of warm-up iterations to optimize model performance.
-            The default value is 10.
-        id2label (dict[int, str] | None): Mapping of class indices to label strings. Required
-            if using custom weights_path. Defaults to None.
+        batch_size (int): The number of images to process in a single batch. If set to a non-positive value,
+            all images will be processed in one batch. Defaults to 8.
     """
 
-    threshold: float
-    warmup_iterations: int = 10
-    id2label: dict[int, str] | None = None
+    batch_size: int = 8
 
 
 class DFINEInference(DFINEBase):
-    """
-    Template designed to perform inference on an image using the D-FINE model.
+    """Template designed to perform object detection inference on images using D-FINE.
+
+    This template handles the entire inference workflow: configuring the model and processor,
+    processing the images from the container, running the model on them, postprocessing the model's outputs
+    and saving the annotations.
 
     Usage example:
 
@@ -52,237 +45,108 @@ class DFINEInference(DFINEBase):
           class_name: DFINEInference
           template_input: InputTemplate
           attributes:
-            config_file: '/path/to/config/file/for/dfine'
-            pretrained_model: null
-            device: 'cuda'
-            weights_path: null
-            output_dir: /sinapsis/cache/dir
-            threshold: 0.4
-            warmup_iterations: 10
-            id2label: null
+            model_path: ustc-community/dfine-small-coco
+            batch_size: 16
+            threshold: 0.5
+            device: cuda
     """
 
     AttributesBaseModel = DFINEInferenceAttributes
 
-    def __init__(self, attributes: TemplateAttributeType) -> None:
-        super().__init__(attributes)
-        self.device = torch.device(self.attributes.device)
-        self.model, self.postprocessor = self._initialize_model_and_postprocessor()
-        self.width, self.height = self.model.decoder.eval_spatial_size
-        self.transforms = self._setup_transforms()
-        self._validate_inference_attributes()
-        self.id2label = self._set_id2label()
-        self._warmup_model()
+    def initialize(self) -> None:
+        """Initializes the template's common state for creation or reset.
 
-    def _validate_inference_attributes(self) -> None:
-        """Validates the attributes for inference workflows.
-
-        Raises:
-            ValueError: If neither weights_path nor pretrained_model is provided.
-            ValueError: If id2label is missing for custom weights.
+        This method is called by both `__init__` and `reset_state` to ensure
+        a consistent state. Can be overriden by subclasses for specific behaviour.
         """
-        self._validate_config_file()
+        super().initialize()
+        self._initialize_processor()
+        self._initialize_model()
 
-        if not (self.attributes.weights_path or self.attributes.pretrained_model):
-            raise ValueError("For inference, either 'weights_path' or 'pretrained_model' must be provided.")
-
-        if self.attributes.weights_path and not self.attributes.id2label:
-            raise ValueError("When using 'weights_path', 'id2label' must be provided to map class indices to labels.")
-
-        if self.attributes.pretrained_model:
-            self._validate_pretrained_model()
-
-        self._validate_id2label()
-
-    def _validate_id2label(self) -> None:
-        """Validates that the id2label dictionary matches the number of model classes.
-
-        Raises:
-            ValueError: If id2label does not match the model's number of classes.
-        """
-        if self.attributes.id2label:
-            num_classes = self.model.decoder.num_classes
-            if len(self.attributes.id2label) != num_classes:
-                raise ValueError(
-                    f"The provided id2label dictionary has {len(self.attributes.id2label)}"
-                    f" entries, but the model expects {num_classes} classes."
-                )
-
-    def _initialize_model_and_postprocessor(self) -> tuple[Any, Any]:
-        """Loads the model and postprocessor based on the configuration.
-
-        Returns:
-            tuple[Any, Any]: Loaded model and postprocessor instances.
-        """
-        cfg = YAMLConfig(self.attributes.config_file)
-        cfg.yaml_cfg[self.KEYS.HGNET_V2]["pretrained"] = False
-        weights_path = self._get_weights_path()
-
-        checkpoint = torch.load(weights_path, map_location="cpu", weights_only=True)
-        state = checkpoint.get("ema", {}).get("module", checkpoint["model"])
-        cfg.model.load_state_dict(state)
-
-        return (
-            cfg.model.deploy().to(self.device),
-            cfg.postprocessor.deploy().to(self.device),
+    def _initialize_processor(self) -> None:
+        """Loads D-FINE image processor."""
+        self.processor = AutoImageProcessor.from_pretrained(
+            self.attributes.model_path, cache_dir=self.attributes.model_cache_dir, use_fast=True
         )
 
-    def _setup_transforms(self) -> T.Compose:
-        """Sets up the image transformations for preprocessing input images.
-
-        Returns:
-            T.Compose: A torchvision transformation pipeline that processes input images.
-        """
-        transforms = T.Compose(
-            [
-                T.ToPILImage(),
-                T.Resize((self.height, self.width)),
-                T.ToTensor(),
-            ]
-        )
-        return transforms
-
-    def _get_weights_path(self) -> str:
-        """Resolves the path to model weights, downloading if necessary.
-
-        Returns:
-            str: Path to the resolved weights file.
-        """
-        if self.attributes.weights_path:
-            return cast(str, self.attributes.weights_path)
-        return self._download_dfine_weights()
-
-    def _set_id2label(self) -> dict[int, str]:
-        """Sets the index to label mapping used for annotations.
-
-        Returns:
-            dict[int, str]: Mapping of class indices to label strings.
-        """
-        if self.attributes.id2label:
-            return cast(dict[int, str], self.attributes.id2label)
-        if self.attributes.pretrained_model["variant"] == "coco":
-            return coco_id2label
-        return objects365_id2label
-
-    def _warmup_model(self) -> None:
-        """Perform a warm-up for the model to optimize performance during actual inference."""
-        dummy_data = torch.randn((1, 3, self.height, self.width)).to(device=self.device)
-        for _ in range(self.attributes.warmup_iterations):
-            with torch.inference_mode():
-                _ = self.model(dummy_data)
-
-    def _preprocess_images(self, image_packets: list[ImagePacket]) -> torch.Tensor:
-        """Preprocesses a batch of images into tensors suitable for model inference.
-
-        Args:
-            image_packets (list[ImagePacket]): A list of image packets containing raw images.
-
-        Returns:
-            torch.Tensor: A tensor containing preprocessed images ready for inference.
-        """
-        images = torch.stack(
-            [
-                self.transforms(
-                    cv2.cvtColor(packet.content, cv2.COLOR_RGB2BGR)
-                    if packet.color_space == ImageColor.RGB
-                    else packet.content
-                )
-                for packet in image_packets
-            ]
+    def _initialize_model(self) -> None:
+        """Loads the pre-trained model onto the resolved device."""
+        self.model = DFineForObjectDetection.from_pretrained(
+            self.attributes.model_path, cache_dir=self.attributes.model_cache_dir
         ).to(self.device)
 
-        return images
+    def _preprocess_images(self, image_packets: list[ImagePacket]) -> torch.Tensor:
+        """Preprocesses a batch of images into a tensor for the model.
 
-    def _create_annotations(
-        self, bboxes: list[list[float]], scores: list[float], labels: list[int]
-    ) -> list[ImageAnnotations]:
+        Args:
+            image_packets (list[ImagePacket]): A list of image packets to process.
+
+        Returns:
+            torch.Tensor: A tensor batch of images ready for inference.
+        """
+        images = [image_packet.content for image_packet in image_packets]
+        processed_images = self.processor(images=images, return_tensors="pt", device=self.device)
+        return processed_images
+
+    def _postprocess_outputs(
+        self, raw_outputs: DFineObjectDetectionOutput, orig_target_sizes: torch.Tensor
+    ) -> list[dict]:
+        """Processes model outputs for a batch of images and filters predictions.
+
+        Args:
+            raw_outputs (DFineObjectDetectionOutput): Raw model outputs for a batch.
+            orig_target_sizes (torch.Tensor): Original image dimensions for rescaling the
+                detections.
+
+        Returns:
+            list[dict]: A list containing tuples of
+                bounding boxes, confidence scores, and class labels for each image.
+        """
+        return self.processor.post_process_object_detection(raw_outputs, self.attributes.threshold, orig_target_sizes)
+
+    def _create_annotations(self, detection: dict) -> list[ImageAnnotations]:
         """Creates annotations from bounding boxes, scores, and labels.
 
         Args:
-            bboxes (list[list[float]]): List of bounding boxes in [x, y, width, height] format.
-            scores (list[float]): List of confidence scores for each detection.
-            labels (list[int]): List of class labels for each detection.
+            detection (dict): Dictionary holding the detections for a single image
 
         Returns:
             list[ImageAnnotations]: List of annotations, each containing a bounding box,
                 confidence score, and label information.
         """
         annotations = []
-        for bbox, score, label in zip(bboxes, scores, labels):
+        for score, label, bbox in zip(
+            detection[self.KEYS.SCORES], detection[self.KEYS.LABELS], detection[self.KEYS.BOXES]
+        ):
+            xywh_bbox = bbox_xyxy_to_xywh(bbox.cpu().numpy())
             annotations.append(
                 ImageAnnotations(
-                    bbox=BoundingBox(*bbox),
-                    confidence_score=score,
-                    label=label,
-                    label_str=self.id2label.get(label),
+                    bbox=BoundingBox(*xywh_bbox),
+                    confidence_score=score.item(),
+                    label=label.item(),
+                    label_str=self.model.config.id2label.get(label.item()),
                 )
             )
         return annotations
-
-    def _convert_outputs_to_annotations(self, processed_outputs: DetectionOutputs) -> list[list[ImageAnnotations]]:
-        """Converts processed model outputs to annotations for a batch of images.
-
-        Args:
-            processed_outputs (DetectionOutputs):
-                Processed outputs containing bounding boxes, confidence scores, and labels.
-
-        Returns:
-            list[list[ImageAnnotations]]: Annotations for each image in the batch.
-        """
-        annotations_batch = []
-        for bboxes, scores, labels in processed_outputs:
-            annotations = self._create_annotations(bboxes, scores, labels)
-            annotations_batch.append(annotations)
-        return annotations_batch
 
     @torch.inference_mode()
     def _run_inference(self, image_packets: list[ImagePacket]) -> list[list[ImageAnnotations]]:
         """Performs inference on a batch of images.
 
-        Args:
+        Args:>
             image_packets (list[ImagePacket]): List of input image packets to process.
 
         Returns:
             list[list[ImageAnnotations]]: A batch of annotations, with each element corresponding
                 to annotations for a single image.
         """
-        orig_target_sizes = torch.tensor([packet.shape[:2][::-1] for packet in image_packets], device=self.device)
-        preprocessed_images = self._preprocess_images(image_packets)
-        outputs = self.model(preprocessed_images)
-        processed_outputs = self._postprocess_outputs(outputs, orig_target_sizes)
-        annotations_batch = self._convert_outputs_to_annotations(processed_outputs)
+        orig_target_sizes = torch.tensor([packet.shape[:2] for packet in image_packets], device=self.device)
+        processed_images = self._preprocess_images(image_packets)
+        raw_outputs = self.model(**processed_images)
+        detections = self._postprocess_outputs(raw_outputs, orig_target_sizes)
+        annotations_batch = [self._create_annotations(det) for det in detections]
 
         return annotations_batch
-
-    def _postprocess_outputs(self, outputs: dict[str, Any], orig_target_sizes: torch.Tensor) -> DetectionOutputs:
-        """Processes model outputs for a batch of images and filters predictions.
-
-        Args:
-            outputs (dict[str, Any]): Raw model outputs for a batch.
-            orig_target_sizes (torch.Tensor): Original image dimensions for rescaling the
-                detections.
-
-        Returns:
-            DetectionOutputs: A list containing tuples of
-                bounding boxes, confidence scores, and class labels for each image.
-        """
-        labels, bboxes, scores = self.postprocessor(outputs, orig_target_sizes)
-
-        batch_size = labels.size(0)
-        keep_mask = scores >= self.attributes.threshold
-
-        filtered_results = []
-        for i in range(batch_size):
-            valid_indices = keep_mask[i]
-            valid_bboxes = bboxes[i][valid_indices].cpu().numpy()
-            valid_scores = scores[i][valid_indices].tolist()
-            valid_labels = labels[i][valid_indices].tolist()
-
-            converted_bboxes = [bbox_xyxy_to_xywh(bbox) for bbox in valid_bboxes]
-
-            filtered_results.append((converted_bboxes, valid_scores, valid_labels))
-
-        return filtered_results
 
     def execute(self, container: DataContainer) -> DataContainer:
         """Executes inference on all images in the data container.
@@ -296,8 +160,18 @@ class DFINEInference(DFINEBase):
         if not container.images:
             return container
 
-        annotations_batch = self._run_inference(container.images)
-        for image_packet, annotations in zip(container.images, annotations_batch):
+        image_packets = container.images
+        all_annotations = []
+
+        if self.attributes.batch_size > 0:
+            for i in range(0, len(image_packets), self.attributes.batch_size):
+                image_batch = image_packets[i : i + self.attributes.batch_size]
+                annotations_for_batch = self._run_inference(image_batch)
+                all_annotations.extend(annotations_for_batch)
+        else:
+            all_annotations = self._run_inference(image_packets)
+
+        for image_packet, annotations in zip(image_packets, all_annotations):
             image_packet.annotations.extend(annotations)
 
         return container

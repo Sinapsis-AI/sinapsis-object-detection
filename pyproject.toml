@@ -1,6 +1,6 @@
 [project]
 name = "sinapsis-object-detection"
-version = "0.3.6"
+version = "0.4.2"
 description = "Mono repo with packages for inference and training with object detection models"
 authors = [
     {name = "SinapsisAI", email = "dev@sinapsis.tech"},
@@ -39,6 +39,7 @@ lint.select = [
     "ANN",
     "BLE",
     "C4",
+    "D",
     "E",
     "F",
     "FIX",
@@ -46,6 +47,7 @@ lint.select = [
     "I",
     "PERF",
     "PIE",
+    "PLR6301",
     "RUF",
     "RSE",
     "SIM",
@@ -55,7 +57,14 @@ lint.select = [
     "TD",
     "TID",
 ]
-lint.ignore = ["ANN401"]
+lint.preview = true
+lint.pydocstyle.convention = "google"
+lint.ignore = [
+    "ANN401",
+    "D100",
+    "D104",
+    "D107"
+]
 line-length = 120
 show-fixes = true
 

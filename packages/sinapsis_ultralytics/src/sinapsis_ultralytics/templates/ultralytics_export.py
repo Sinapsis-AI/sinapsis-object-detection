@@ -5,6 +5,7 @@ from sinapsis_core.data_containers.data_packet import DataContainer
 from sinapsis_core.utils.env_var_keys import WORKING_DIR
 from ultralytics.utils.files import WorkingDirectory
 
+from sinapsis_ultralytics.helpers.params import ExportParams
 from sinapsis_ultralytics.helpers.tags import Tags
 from sinapsis_ultralytics.templates.ultralytics_base import UltralyticsBase
 
@@ -53,7 +54,7 @@ class UltralyticsExport(UltralyticsBase):
         """
         Attributes for Ultralytics Export Template
 
-        export_params (Dict[str, Any]): Dict containing the parameters
+        export_params (ExportParams): ExportParams containing the parameters
         required to export an Ultralytics model to a desired format.
         If not specified, model will be exported using default parameters.
 
@@ -62,11 +63,11 @@ class UltralyticsExport(UltralyticsBase):
         https://docs.ultralytics.com/modes/export/#arguments
         """
 
-        export_params: dict = Field(default_factory=dict)
+        export_params: ExportParams = Field(default_factory=ExportParams)
 
     def execute(self, container: DataContainer) -> DataContainer:
         with WorkingDirectory(WORKING_DIR):
-            exported_path = self.model.export(**self.attributes.export_params)
+            exported_path = self.model.export(**self.attributes.export_params.model_dump())
             self.logger.info(f"Model exported to {exported_path}")
 
         return container

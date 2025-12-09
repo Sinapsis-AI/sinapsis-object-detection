@@ -3,6 +3,8 @@ from enum import Enum
 
 
 class Tags(Enum):
+    """An enumeration of standardized tags for categorizing templates."""
+
     DFINE = "dfine"
     IMAGE = "image"
     INFERENCE = "inference"

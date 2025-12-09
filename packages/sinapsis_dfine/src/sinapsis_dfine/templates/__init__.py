@@ -6,7 +6,7 @@ _root_lib_path = "sinapsis_dfine.templates"
 
 _template_lookup = {
     "DFINEInference": f"{_root_lib_path}.dfine_inference",
-    "DFINETraining": f"{_root_lib_path}.dfine_train",
+    "DFINETraining": f"{_root_lib_path}.dfine_training",
 }
 
 

@@ -1,16 +1,27 @@
 # -*- coding: utf-8 -*-
-from pydantic import Field
+import os
+from pathlib import Path
+
+from pydantic import BaseModel, ConfigDict, Field
 from sinapsis_core.data_containers.data_packet import DataContainer
 from sinapsis_core.template_base.base_models import (
     TemplateAttributeType,
 )
+from sinapsis_core.utils.env_var_keys import SINAPSIS_CACHE_DIR
 
-from sinapsis_rfdetr.helpers.rfdetr_helpers import initialize_output_dir
+from sinapsis_rfdetr.helpers.rfdetr_helpers import RFDETRKeys
 from sinapsis_rfdetr.helpers.tags import Tags
 from sinapsis_rfdetr.templates.rfdetr_model_base import RFDETRModelBase, RFDETRModelLarge
 
 RFDETRExportUIProperties = RFDETRModelBase.UIProperties
 RFDETRExportUIProperties.tags.extend([Tags.ONNX, Tags.EXPORT])
+
+
+class ExportParams(BaseModel):
+    """Parameters for exporting the RF-DETR model."""
+
+    output_dir: str = str(Path(SINAPSIS_CACHE_DIR) / RFDETRKeys.rfdetr / RFDETRKeys.output)
+    model_config = ConfigDict(extra="allow")
 
 
 class RFDETRExport(RFDETRModelBase):
@@ -44,7 +55,7 @@ class RFDETRExport(RFDETRModelBase):
         Attributes for configuring the RF-DETR export template.
 
         Args:
-            export_params (dict[str, Any]):
+            export_params (ExportParams):
                 A dictionary containing the export parameters for the RF-DETR model. If not specified, default
                 parameters will be used.
 
@@ -53,12 +64,12 @@ class RFDETRExport(RFDETRModelBase):
               `SINAPSIS_CACHE_DIR/rfdetr`.
         """
 
-        export_params: dict = Field(default_factory=dict)
+        export_params: ExportParams = Field(default_factory=ExportParams)
 
     def __init__(self, attributes: TemplateAttributeType) -> None:
         """Initializes the RF-DETR templates with the given attributes."""
         super().__init__(attributes)
-        self.attributes.export_params = initialize_output_dir(self.attributes.export_params)
+        os.makedirs(self.attributes.export_params.output_dir, exist_ok=True)
 
     def execute(self, container: DataContainer) -> DataContainer:
         """Executes the export process for the RF-DETR model to ONNX format.
@@ -69,7 +80,7 @@ class RFDETRExport(RFDETRModelBase):
         Returns:
             DataContainer: Container updated with generated annotations for each image.
         """
-        self.model.export(**self.attributes.export_params)
+        self.model.export(**self.attributes.export_params.model_dump())
         return container
 
 
@@ -80,7 +91,7 @@ class RFDETRLargeExportAttributes(RFDETRModelLarge.AttributesBaseModel, RFDETREx
         model_params (RFDETRLargeConfig): An instance of `RFDETRLargeConfig` containing the model parameters
             for initializing the RF-DETR model. If not provided, default parameters from `RFDETRLargeConfig`
             will be used.
-        export_params (dict[str, Any]): A dictionary containing the export parameters for the RF-DETR model.
+        export_params (ExportParams): A dictionary containing the export parameters for the RF-DETR model.
             If not specified, default parameters will be used.
     """
 

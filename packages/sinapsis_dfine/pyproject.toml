@@ -1,6 +1,6 @@
 [project]
 name = "sinapsis-dfine"
-version = "0.1.8"
+version = "0.2.1"
 description = "Training and inference templates based on the D-FINE architecture."
 authors = [
     {name = "SinapsisAI", email = "dev@sinapsis.tech"},
@@ -9,11 +9,13 @@ readme = "README.md"
 license-files = ["LICENSE"]
 requires-python = ">=3.10"
 dependencies = [
-    "dfine>=0.1.0",
-    "huggingface-hub>=0.29.3",
-    "opencv-python-headless>=4.11.0.86",
+    "datasets>=4.2.0",
     "sinapsis>=0.1.1",
+    "sinapsis-data-visualization>=0.1.12",
     "sinapsis-generic-data-tools>=0.1.1",
+    "torch>=2.8.0",
+    "torchmetrics>=1.8.2",
+    "transformers[accelerate, hf-xet]>=4.56.1",
 ]
 
 [project.optional-dependencies]
@@ -21,17 +23,15 @@ sinapsis-data-readers = [
     "sinapsis-data-readers>=0.1.1",
 ]
 sinapsis-data-visualization = [
-    "sinapsis-data-visualization[all]>=0.1.0",
+    "sinapsis-data-visualization[all]>=0.1.12",
 ]
 sinapsis-data-writers = [
     "sinapsis-data-writers>=0.1.1",
 ]
 all = [
-    "sinapsis-dfine[sinapsis-data-readers,sinapsis-data-visualization,sinapsis-data-writers,training]",
-]
-
-training = [
-    "dfine[training]>=0.1.0",
+    "sinapsis-dfine[sinapsis-data-readers]",
+    "sinapsis-dfine[sinapsis-data-visualization]",
+    "sinapsis-dfine[sinapsis-data-writers]",
 ]
 
 [dependency-groups]
@@ -46,6 +46,7 @@ lint.select = [
     "ANN",
     "BLE",
     "C4",
+    "D",
     "E",
     "F",
     "FIX",
@@ -53,6 +54,7 @@ lint.select = [
     "I",
     "PERF",
     "PIE",
+    "PLR6301",
     "RUF",
     "RSE",
     "SIM",
@@ -62,15 +64,20 @@ lint.select = [
     "TD",
     "TID",
 ]
-lint.ignore = ["ANN401"]
+lint.preview = true
+lint.pydocstyle.convention = "google"
+lint.ignore = [
+    "ANN401",
+    "D100",
+    "D104",
+    "D107"
+]
 line-length = 120
 show-fixes = true
-
 
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
-
 
 [[tool.uv.index]]
 name = "sinapsis"
@@ -78,8 +85,6 @@ url = "https://pypi.sinapsis.tech/"
 
 [tool.uv.sources]
 sinapsis-dfine = { workspace = true }
-
-
 
 [project.urls]
 Homepage = "https://sinapsis.tech"

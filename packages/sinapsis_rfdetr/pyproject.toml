@@ -1,6 +1,6 @@
 [project]
 name = "sinapsis-rfdetr"
-version = "0.1.7"
+version = "0.1.14"
 description = "Training and inference templates based on the RF-DETR object detection model"
 authors = [
     {name = "SinapsisAI", email = "dev@sinapsis.tech"},
@@ -12,7 +12,7 @@ dependencies = [
     "numpy==1.26.4",
     "onnxruntime>=1.21.0",
     "protobuf==3.20.2",
-    "rfdetr[metrics]>=1.0.8",
+    "rfdetr[metrics]==1.2.1",
     "sinapsis>=0.1.1",
 ]
 

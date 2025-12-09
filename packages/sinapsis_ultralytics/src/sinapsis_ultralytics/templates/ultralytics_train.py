@@ -4,6 +4,7 @@ from pydantic import Field
 from sinapsis_core.data_containers.data_packet import DataContainer
 from ultralytics.utils.files import WorkingDirectory
 
+from sinapsis_ultralytics.helpers.params import TrainParams
 from sinapsis_ultralytics.helpers.tags import Tags
 from sinapsis_ultralytics.templates.ultralytics_base import UltralyticsBase
 
@@ -51,14 +52,14 @@ class UltralyticsTrain(UltralyticsBase):
         Attributes for UltralyticsTrain Template
 
         Args:
-            training_params (dict[str, Any]): A dictionary containing the training parameters for
+            training_params (TrainParams): TrainParams containing the training parameters for
                 the Ultralytics model. If not specified, default parameters will be used.
 
             The full documentation for available training parameters can be found in the Ultralytics docs:
             https://docs.ultralytics.com/modes/train/#train-settings
         """
 
-        training_params: dict = Field(default_factory=dict)
+        training_params: TrainParams = Field(default_factory=TrainParams)
 
     def execute(self, container: DataContainer) -> DataContainer:
         """
@@ -71,7 +72,7 @@ class UltralyticsTrain(UltralyticsBase):
         """
         with WorkingDirectory(self.attributes.working_dir):
             # Train the model using the training parameters
-            trained_model = self.model.train(**self.attributes.training_params)
+            trained_model = self.model.train(**self.attributes.training_params.model_dump())
 
             # Store the model's metrics and the trained model's directory path
             model_info = {

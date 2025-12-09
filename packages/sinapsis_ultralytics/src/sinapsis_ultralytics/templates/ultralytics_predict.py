@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from typing import Any
 
 from pydantic import Field
 from sinapsis_core.data_containers.data_packet import DataContainer, ImagePacket
 from ultralytics import models
 from ultralytics.engine.results import Results
 
+from sinapsis_ultralytics.helpers.params import PredictParams
 from sinapsis_ultralytics.helpers.tags import Tags
 from sinapsis_ultralytics.helpers.ultralytics_predict_helpers import (
     get_annotations_from_ultralytics_result,
@@ -44,7 +44,7 @@ class UltralyticsPredict(UltralyticsBase):
         """
         Attributes for Ultralytics Predict Template
 
-        predict_params (Dict[str, Any]): Dict containing the parameters
+        predict_params (PredictParams): PredictParams containing the parameters
         required to run inference using an Ultralytics model. If not specified,
         model predictions will be obtained using default parameters.
 
@@ -52,7 +52,7 @@ class UltralyticsPredict(UltralyticsBase):
         https://docs.ultralytics.com/modes/predict/#inference-arguments
         """
 
-        predict_params: dict[str, Any] = Field(default_factory=dict)
+        predict_params: PredictParams = Field(default_factory=PredictParams)
         use_detections_as_sam_prompt: bool = False
 
     def is_sam_model(self) -> bool:
@@ -79,7 +79,7 @@ class UltralyticsPredict(UltralyticsBase):
         if self.attributes.use_detections_as_sam_prompt:
             bbox_list = self.get_bbox_list(image_packet)
             if bbox_list:
-                self.attributes.predict_params["bboxes"] = bbox_list
+                self.attributes.predict_params.bboxes = bbox_list
                 return True
         return False
 
@@ -118,14 +118,16 @@ class UltralyticsPredict(UltralyticsBase):
         """
         if container.images:
             for image_packet in container.images:
-                self.attributes.predict_params["source"] = image_packet.content
+                self.attributes.predict_params.source = image_packet.content
                 if self.is_sam_model():
                     if self.predict_params_updated(image_packet):
-                        predict_results = self.model.predict(**self.attributes.predict_params)
+                        predict_results = self.model.predict(**self.attributes.predict_params.model_dump())
                         self.process_results(predict_results, image_packet)
                     continue
 
-                predict_results = self.model.predict(**self.attributes.predict_params)
+                predict_results = self.model.predict(
+                    **self.attributes.predict_params.model_dump(exclude={"bboxes"}, exclude_none=True)
+                )
                 self.process_results(predict_results, image_packet)
 
     @staticmethod
