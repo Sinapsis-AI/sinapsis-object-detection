@@ -1,6 +1,6 @@
 agent:
   name: dfine_training
-  description: "Agent that runs a training job from scratch using the D-FINE nano model architecture"
+  description: "Agent that runs a training job using the D-FINE nano model architecture"
 
 templates:
   - template_name: InputTemplate
@@ -11,9 +11,35 @@ templates:
     class_name: DFINETraining
     template_input: InputTemplate
     attributes:
-      config_file: configs/dfine/dfine_hgnetv2_n_coco.yml
-      training_mode: scratch
-      seed: 42
-      use_amp: true
+      training_mode: from-scratch
+      model_path: ustc-community/dfine-nano-coco
+      threshold: 0.1
       device: cuda
-      output_dir: ./artifacts/dfine_hgnetv2_n_coco
+      dataset_path: driesverachtert/basic_shapes_object_detection
+      annotation_keys:
+        bbox: bbox
+        category: category
+        area: area
+      mapping_args:
+        batch_size: 64
+        num_proc: 1
+      image_size:
+        width: 640
+        height: 640
+      training_args:
+        output_dir: "artifacts/checkpoints"
+        num_train_epochs: 100
+        max_grad_norm: 0.1
+        learning_rate: 8e-5
+        weight_decay: 0.01
+        warmup_ratio: 0.1
+        per_device_train_batch_size: 8
+        dataloader_num_workers: 0
+        fp16: true
+        metric_for_best_model: "eval_map"
+        greater_is_better: true
+        load_best_model_at_end: true
+        eval_strategy: "epoch"
+        save_strategy: "epoch"
+        save_total_limit: 2
+      save_dir: "artifacts/dfine-nano-shapes"

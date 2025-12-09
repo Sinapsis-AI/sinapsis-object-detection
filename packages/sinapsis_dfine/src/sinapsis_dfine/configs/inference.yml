@@ -17,13 +17,10 @@ templates:
     class_name: DFINEInference
     template_input: FolderImageDatasetCV2
     attributes:
+      model_path: ustc-community/dfine-small-coco
+      batch_size: 16
       threshold: 0.5
-      config_file: artifacts/configs/dfine/dfine_hgnetv2_n_coco.yml
       device: cuda
-      output_dir: ./artifacts/dfine_hgnetv2_n_coco
-      pretrained_model:
-        size: n
-        variant: coco
 
   - template_name: BBoxDrawer
     class_name: BBoxDrawer

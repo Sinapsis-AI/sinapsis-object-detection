@@ -28,7 +28,7 @@ services:
       file: compose.yaml
     container_name: sinapsis-ultralytics-train
     volumes:
-    - "../packages/sinapsis_ultralytics/src/sinapsis_ultralytics/configs/:/app//packages/sinapsis_ultralytics/src/sinapsis_ultralytics/configs/"
+    - "../packages/sinapsis_ultralytics/src/sinapsis_ultralytics/configs/:/app/packages/sinapsis_ultralytics/src/sinapsis_ultralytics/configs/"
     - "../webapps/:/app/webapps/"
     command: python3 webapps/training_app.py
 
@@ -38,6 +38,8 @@ services:
       file: compose.yaml
     container_name: sinapsis-ultralytics-inference
     volumes:
-      - "../packages/sinapsis-sinapsis_ultralytics/src/sinapsis_ultralytics/configs/:/app//packages/sinapsis_ultralytics/src/sinapsis_ultralytics/configs/"
+      - "../packages/sinapsis-sinapsis_ultralytics/src/sinapsis_ultralytics/configs/:/app/webapps/packages/sinapsis_ultralytics/src/sinapsis_ultralytics/configs/"
       - "../webapps/:/app/webapps/"
+    environment:
+      AGENT_CONFIG_PATH: ""
     command: python3 webapps/inference_app.py
