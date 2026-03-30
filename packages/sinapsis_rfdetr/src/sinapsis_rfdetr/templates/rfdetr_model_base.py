@@ -176,4 +176,4 @@ class RFDETRModelLarge(RFDETRModelBase):
             https://github.com/roboflow/rf-detr/blob/main/rfdetr/config.py
         """
 
-        model_params: RFDETRLargeConfig = Field(default_factory=RFDETRLargeConfig)  # type: ignore[arg-type]
+        model_params: RFDETRLargeConfig  = Field(default_factory=RFDETRLargeConfig)  # type: ignore[arg-type]
