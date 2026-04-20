@@ -10,7 +10,8 @@ from sinapsis_ultralytics.helpers.tags import Tags
 from sinapsis_ultralytics.templates.ultralytics_base import UltralyticsBase
 
 UltralyticsExportUIProperties = UltralyticsBase.UIProperties
-UltralyticsExportUIProperties.tags.extend([Tags.EXPORT, Tags.ONNX, Tags.TENSORFLOW, Tags.TENSORRT])
+if UltralyticsExportUIProperties.tags is not None:
+    UltralyticsExportUIProperties.tags.extend([Tags.EXPORT, Tags.ONNX, Tags.TENSORFLOW, Tags.TENSORRT])
 
 
 class UltralyticsExport(UltralyticsBase):
@@ -64,6 +65,8 @@ class UltralyticsExport(UltralyticsBase):
         """
 
         export_params: ExportParams = Field(default_factory=ExportParams)
+
+    attributes: AttributesBaseModel
 
     def execute(self, container: DataContainer) -> DataContainer:
         with WorkingDirectory(WORKING_DIR):

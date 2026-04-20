@@ -6,7 +6,8 @@ from sinapsis_rfdetr.helpers.tags import Tags
 from sinapsis_rfdetr.templates.rfdetr_model_base import RFDETRModelBase, RFDETRModelLarge
 
 RFDETRInferenceUIProperties = RFDETRModelBase.UIProperties
-RFDETRInferenceUIProperties.tags.extend([Tags.INFERENCE])
+if RFDETRInferenceUIProperties.tags is not None:
+    RFDETRInferenceUIProperties.tags.extend([Tags.INFERENCE])
 
 
 class RFDETRInference(RFDETRModelBase):
@@ -50,6 +51,8 @@ class RFDETRInference(RFDETRModelBase):
 
         annotations_path: str = ""
         threshold: float = 0.5
+
+    attributes: AttributesBaseModel
 
     def initialize(self) -> None:
         """Initializes the template's common state for creation or reset.

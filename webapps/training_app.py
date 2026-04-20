@@ -17,8 +17,7 @@ model_configs = {
 
 
 def get_output_images(output_container: DataContainer) -> list[str]:
-    """
-    Retrieve the output images from the directory specified in the container.
+    """Retrieve the output images from the directory specified in the container.
 
     Args:
         output_container (str): The path to the container's output directory.
@@ -26,13 +25,13 @@ def get_output_images(output_container: DataContainer) -> list[str]:
     Returns:
         list: A list of image file paths (PNG and JPG) within the output directory.
     """
-    output_dir = output_container.generic_data.get("UltralyticsTrain").get("trained_model_path")
+    ultralytics_train = output_container.generic_data.get("UltralyticsTrain", {})
+    output_dir = ultralytics_train.get("trained_model_path")
     return [os.path.join(output_dir, file) for file in os.listdir(output_dir) if (file.endswith(("png", "jpg")))]
 
 
 def model_train(specific_task: str) -> list:
-    """
-    Train a model for the specified task.
+    """Train a model for the specified task.
 
     This function resolves the training configuration based on the task and uses it to initialize an agent
     to perform training and attach important metadata to a container.
@@ -46,16 +45,16 @@ def model_train(specific_task: str) -> list:
             - output_container: The resulting container with relevant metadata.
             - str: A success message indicating that the training was completed.
     """
-
     agent = generic_agent_builder(specific_task)
     output_container = agent(DataContainer())
-    images = get_output_images(output_container)
+    images = []
+    if isinstance(output_container, DataContainer):
+        images = get_output_images(output_container)
     return images
 
 
 def select_config(specific_task: str) -> str:
-    """
-    Retrieve the configuration file path for a given task.
+    """Retrieve the configuration file path for a given task.
 
     Args:
         specific_task (str): The task name ('detect', 'segment', 'classify', 'pose', 'obb').

@@ -29,12 +29,12 @@ class MAPEvaluator:
             threshold (float, optional): The confidence score threshold for filtering detections
                 before metric calculation.
         """
-        self.image_processor = image_processor
+        self.image_processor: AutoImageProcessor = image_processor
         self.id2label = id2label
         self.threshold = threshold
 
     def _collect_and_format_predictions(
-        self, predictions_batches: list[tuple], label_batches: list[list[dict]]
+        self, predictions_batches: np.ndarray | tuple[np.ndarray], label_batches: np.ndarray | tuple[np.ndarray]
     ) -> list[dict]:
         """Formats raw model predictions into the structure required by torchmetrics.
 
@@ -61,16 +61,16 @@ class MAPEvaluator:
                     pred_boxes=torch.from_numpy(boxes).unsqueeze(0),
                 )
 
-                post_processed_output = self.image_processor.post_process_object_detection(
+                post_processed = self.image_processor.post_process_object_detection(  # ty: ignore[unresolved-attribute]
                     outputs=outputs_object,
                     threshold=self.threshold,
                     target_sizes=target_sizes,
                 )
-                processed_predictions.append(post_processed_output[0])
+                processed_predictions.append(post_processed[0])
         return processed_predictions
 
     @staticmethod
-    def _collect_and_format_targets(label_batches: list[list[dict]]) -> list[dict]:
+    def _collect_and_format_targets(label_batches: np.ndarray | tuple[np.ndarray]) -> list[dict]:
         """Formats ground truth labels into the structure required by torchmetrics.
 
         This method converts bounding boxes from the `center_to_corners_format` (xywh)
@@ -87,7 +87,7 @@ class MAPEvaluator:
         for batch in label_batches:
             for label in batch:
                 height, width = label["orig_size"]
-                boxes = center_to_corners_format(torch.from_numpy(label["boxes"]))
+                boxes = center_to_corners_format(torch.from_numpy(label["boxes"]))  # ty: ignore[invalid-argument-type]
                 boxes = boxes * torch.tensor([width, height, width, height])
                 labels = torch.from_numpy(label["class_labels"])
                 processed_targets.append({"boxes": boxes, "labels": labels})
@@ -115,8 +115,8 @@ class MAPEvaluator:
 
         evaluator = MeanAveragePrecision(box_format="xyxy", class_metrics=True)
         evaluator.warn_on_many_detections = False
-        evaluator.update(formatted_predictions, formatted_targets)
-        metrics = evaluator.compute()
+        evaluator.update(formatted_predictions, formatted_targets)  # ty: ignore[invalid-argument-type]
+        metrics = evaluator.compute()  # ty: ignore[missing-argument]
 
         if "classes" in metrics:
             map_per_class = metrics.pop("map_per_class").tolist()

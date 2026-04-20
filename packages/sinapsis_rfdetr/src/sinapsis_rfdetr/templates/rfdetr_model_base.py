@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import gc
 from os import path
-from typing import Literal
+from typing import Any, Literal
 
 import rfdetr
 import torch
@@ -64,6 +64,8 @@ class RFDETRModelBase(Template):
 
         model_params: RFDETRBaseConfig = Field(default_factory=RFDETRBaseConfig)  # type: ignore[arg-type]
 
+    attributes: AttributesBaseModel
+
     def __init__(self, attributes: TemplateAttributeType) -> None:
         """Initializes the RF-DETR templates with the given attributes."""
         super().__init__(attributes)
@@ -93,7 +95,7 @@ class RFDETRModelBase(Template):
             if path.exists(_pretrain_weights):
                 setattr(self.attributes.model_params, RFDETRKeys.pretrain_weights, _pretrain_weights)
 
-    def _initialize_model(self) -> rfdetr:
+    def _initialize_model(self) -> Any:
         """
         Initialize the model according to the specified model class and configuration.
 
@@ -176,4 +178,4 @@ class RFDETRModelLarge(RFDETRModelBase):
             https://github.com/roboflow/rf-detr/blob/main/rfdetr/config.py
         """
 
-        model_params: RFDETRLargeConfig  = Field(default_factory=RFDETRLargeConfig)  # type: ignore[arg-type]
+        model_params: RFDETRLargeConfig = Field(default_factory=RFDETRLargeConfig)  # type: ignore[arg-type]

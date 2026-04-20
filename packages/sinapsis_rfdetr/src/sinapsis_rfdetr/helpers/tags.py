@@ -2,7 +2,7 @@
 from enum import Enum
 
 
-class Tags(Enum):
+class Tags(str, Enum):
     EXPORT = "export"
     IMAGE = "image"
     INFERENCE = "inference"

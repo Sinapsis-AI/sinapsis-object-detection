@@ -9,7 +9,8 @@ from sinapsis_ultralytics.helpers.tags import Tags
 from sinapsis_ultralytics.templates.ultralytics_base import UltralyticsBase
 
 UltralyticsTrainUIProperties = UltralyticsBase.UIProperties
-UltralyticsTrainUIProperties.tags.extend([Tags.DATASET, Tags.TRAINING])
+if UltralyticsTrainUIProperties.tags is not None:
+    UltralyticsTrainUIProperties.tags.extend([Tags.DATASET, Tags.TRAINING])
 
 
 class UltralyticsTrain(UltralyticsBase):
@@ -60,6 +61,8 @@ class UltralyticsTrain(UltralyticsBase):
         """
 
         training_params: TrainParams = Field(default_factory=TrainParams)
+
+    attributes: AttributesBaseModel
 
     def execute(self, container: DataContainer) -> DataContainer:
         """

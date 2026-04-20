@@ -14,7 +14,8 @@ from sinapsis_rfdetr.helpers.tags import Tags
 from sinapsis_rfdetr.templates.rfdetr_model_base import RFDETRModelBase, RFDETRModelLarge
 
 RFDETRExportUIProperties = RFDETRModelBase.UIProperties
-RFDETRExportUIProperties.tags.extend([Tags.ONNX, Tags.EXPORT])
+if RFDETRExportUIProperties.tags is not None:
+    RFDETRExportUIProperties.tags.extend([Tags.ONNX, Tags.EXPORT])
 
 
 class ExportParams(BaseModel):
@@ -65,6 +66,8 @@ class RFDETRExport(RFDETRModelBase):
         """
 
         export_params: ExportParams = Field(default_factory=ExportParams)
+
+    attributes: AttributesBaseModel
 
     def __init__(self, attributes: TemplateAttributeType) -> None:
         """Initializes the RF-DETR templates with the given attributes."""

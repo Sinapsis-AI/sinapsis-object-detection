@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import gradio as gr
-from helpers.download_configs import download_configs_folder
+from helpers.download_configs import download_configs_folder  # ty: ignore[unresolved-import]
 from sinapsis.webapp.agent_gradio_helper import (
     add_logo_and_title,
     css_header,
@@ -8,7 +8,7 @@ from sinapsis.webapp.agent_gradio_helper import (
 )
 from sinapsis_core.utils.env_var_keys import AGENT_CONFIG_PATH, GRADIO_SHARE_APP
 
-CONFIG_PATH = AGENT_CONFIG_PATH or "packages/sinapsis_dfine/src/sinapsis_dfine/configs/demo.yml"
+CONFIG_PATH = AGENT_CONFIG_PATH or "packages/sinapsis_rfdetr/src/sinapsis_rfdetr/configs/rfdetr_demo.yml"
 
 
 def create_demo() -> gr.Blocks:
@@ -19,7 +19,9 @@ def create_demo() -> gr.Blocks:
     """
     with gr.Blocks(css=css_header(), title="Sinapsis Object Detection") as demo:
         add_logo_and_title("Sinapsis Object Detection")
-        init_image_inference(CONFIG_PATH, stream=True, app_message="""Detect objects in images using state-of-the-art models.""")
+        init_image_inference(
+            CONFIG_PATH, stream=True, app_message="""Detect objects in images using state-of-the-art models."""
+        )
 
     return demo
 
@@ -27,4 +29,4 @@ def create_demo() -> gr.Blocks:
 if __name__ == "__main__":
     download_configs_folder(path="artifacts/configs")
     demo = create_demo()
-    demo.launch(share=GRADIO_SHARE_APP)
+    demo.launch(share=bool(GRADIO_SHARE_APP))

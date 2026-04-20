@@ -14,9 +14,10 @@ from sinapsis_ultralytics.helpers.ultralytics_predict_helpers import (
 from sinapsis_ultralytics.templates.ultralytics_base import UltralyticsBase
 
 UltralyticsPredictUIProperties = UltralyticsBase.UIProperties
-UltralyticsPredictUIProperties.tags.extend(
-    [Tags.INFERENCE, Tags.PREDICTION, Tags.CLASSIFICATION, Tags.DETECTION, Tags.OBBS, Tags.SEGMENTATION]
-)
+if UltralyticsPredictUIProperties.tags is not None:
+    UltralyticsPredictUIProperties.tags.extend(
+        [Tags.INFERENCE, Tags.PREDICTION, Tags.CLASSIFICATION, Tags.DETECTION, Tags.OBBS, Tags.SEGMENTATION]
+    )
 
 
 class UltralyticsPredict(UltralyticsBase):
@@ -54,6 +55,8 @@ class UltralyticsPredict(UltralyticsBase):
 
         predict_params: PredictParams = Field(default_factory=PredictParams)
         use_detections_as_sam_prompt: bool = False
+
+    attributes: AttributesBaseModel
 
     def is_sam_model(self) -> bool:
         """

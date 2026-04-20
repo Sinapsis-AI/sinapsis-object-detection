@@ -9,7 +9,8 @@ from sinapsis_ultralytics.helpers.tags import Tags
 from sinapsis_ultralytics.templates.ultralytics_base import UltralyticsBase
 
 UltralyticsValUIProperties = UltralyticsBase.UIProperties
-UltralyticsValUIProperties.tags.extend([Tags.DATASET, Tags.TRAINING, Tags.VALIDATION, Tags.METRICS])
+if UltralyticsValUIProperties.tags is not None:
+    UltralyticsValUIProperties.tags.extend([Tags.DATASET, Tags.TRAINING, Tags.VALIDATION, Tags.METRICS])
 
 
 class UltralyticsVal(UltralyticsBase):
@@ -51,6 +52,8 @@ class UltralyticsVal(UltralyticsBase):
         """
 
         validation_params: ValidationParams = Field(default_factory=ValidationParams)
+
+    attributes: AttributesBaseModel
 
     def execute(self, container: DataContainer) -> DataContainer:
         """

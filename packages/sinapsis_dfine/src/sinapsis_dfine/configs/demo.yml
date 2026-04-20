@@ -11,7 +11,7 @@ templates:
     class_name: DFINEInference
     template_input: InputTemplate
     attributes:
-      model_path: cppe-5-dfine-nano
+      model_path: ustc-community/dfine-nano-coco
       batch_size: 16
       threshold: 0.5
       device: cuda

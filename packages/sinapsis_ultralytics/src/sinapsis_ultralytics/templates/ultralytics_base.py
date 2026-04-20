@@ -65,6 +65,8 @@ class UltralyticsBase(Template):
         runs_dir: str | Path = path.join(working_dir, "runs")
         checkpoint_path: str | Path | None = None
 
+    attributes: AttributesBaseModel
+
     def __init__(self, attributes: TemplateAttributeType) -> None:
         """Initializes the Ultralytics templates with the given attributes."""
         super().__init__(attributes)
@@ -91,7 +93,7 @@ class UltralyticsBase(Template):
         Initialize model according to the specified model class. If a checkpoint path is set
         the model is initialized using the loaded pre-trained weights.
         """
-        self.model: models = self.model_class(**self.model_params)
+        self.model = self.model_class(**self.model_params)
 
         if self.attributes.checkpoint_path:
             self._load_pretrained_model()

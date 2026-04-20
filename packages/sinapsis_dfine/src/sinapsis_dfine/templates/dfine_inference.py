@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from typing import cast
+
 import torch
 from sinapsis_core.data_containers.annotations import BoundingBox, ImageAnnotations
 from sinapsis_core.data_containers.data_packet import (
@@ -52,6 +54,7 @@ class DFINEInference(DFINEBase):
     """
 
     AttributesBaseModel = DFINEInferenceAttributes
+    attributes: DFINEInferenceAttributes
 
     def initialize(self) -> None:
         """Initializes the template's common state for creation or reset.
@@ -140,9 +143,13 @@ class DFINEInference(DFINEBase):
             list[list[ImageAnnotations]]: A batch of annotations, with each element corresponding
                 to annotations for a single image.
         """
-        orig_target_sizes = torch.tensor([packet.shape[:2] for packet in image_packets], device=self.device)
+        packet_shapes = []
+        for packet in image_packets:
+            packet_shape = cast(tuple, packet.shape)
+            packet_shapes.append(packet_shape[:2])
+        orig_target_sizes = torch.tensor(packet_shapes, device=self.device)
         processed_images = self._preprocess_images(image_packets)
-        raw_outputs = self.model(**processed_images)
+        raw_outputs = self.model(**processed_images)  # ty: ignore[invalid-argument-type]
         detections = self._postprocess_outputs(raw_outputs, orig_target_sizes)
         annotations_batch = [self._create_annotations(det) for det in detections]
 

@@ -55,6 +55,7 @@ class DFINEBase(Template):
         tags=[Tags.DFINE, Tags.IMAGE, Tags.INFERENCE, Tags.MODELS, Tags.TRAINING, Tags.OBJECT_DETECTION],
     )
     KEYS = DFINEKeys()
+    attributes: DFINEBaseAttributes
 
     def __init__(self, attributes: TemplateAttributeType) -> None:
         super().__init__(attributes)
@@ -104,7 +105,7 @@ class DFINEBase(Template):
         Subclasses can override this method to unload other resources as needed.
         """
         if hasattr(self, "model") and self.model is not None:
-            self.model.to("cpu")
+            self.model.to("cpu")  # ty: ignore[unresolved-attribute]
             del self.model
         if hasattr(self, "processor") and self.processor is not None:
             del self.processor

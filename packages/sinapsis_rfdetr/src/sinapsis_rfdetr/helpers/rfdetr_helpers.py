@@ -68,7 +68,9 @@ def get_annotations(prediction_results: Detections, annotations_path: str | None
         annotations_data = read_json_file(file_path=annotations_path)
         class_map = coco_categories_to_classes(coco_categories=annotations_data[RFDETRKeys.categories])
 
-    labels = [f"{class_map[class_id]}" for class_id in prediction_results.class_id]
+    labels = []
+    if prediction_results.class_id is not None:
+        labels = [f"{class_map[class_id]}" for class_id in prediction_results.class_id]
 
     annotations = []
     for idx, detection in enumerate(prediction_results):

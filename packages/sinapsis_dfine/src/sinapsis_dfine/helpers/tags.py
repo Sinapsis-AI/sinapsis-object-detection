@@ -2,7 +2,7 @@
 from enum import Enum
 
 
-class Tags(Enum):
+class Tags(str, Enum):
     """An enumeration of standardized tags for categorizing templates."""
 
     DFINE = "dfine"

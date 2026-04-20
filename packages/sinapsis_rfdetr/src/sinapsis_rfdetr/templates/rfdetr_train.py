@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from typing import Literal
+from typing import Literal, cast
 
 import pandas as pd
 from pydantic import Field
@@ -14,7 +14,8 @@ from sinapsis_rfdetr.helpers.tags import Tags
 from sinapsis_rfdetr.templates.rfdetr_model_base import RFDETRModelBase, RFDETRModelLarge
 
 RFDETRTrainUIProperties = RFDETRModelBase.UIProperties
-RFDETRTrainUIProperties.tags.extend([Tags.TRAINING])
+if RFDETRTrainUIProperties.tags is not None:
+    RFDETRTrainUIProperties.tags.extend([Tags.TRAINING])
 
 
 class RFDETRTrain(RFDETRModelBase):
@@ -82,11 +83,13 @@ class RFDETRTrain(RFDETRModelBase):
         callback: Literal["on_fit_epoch_end", "on_train_batch_start", "on_train_end"] = "on_fit_epoch_end"
         training_params: TrainConfig = Field(default_factory=dict)  # type: ignore[arg-type]
 
+    attributes: AttributesBaseModel
+
     def __init__(self, attributes: TemplateAttributeType) -> None:
         """Initializes the RF-DETR templates with the given attributes."""
         super().__init__(attributes)
         self.history: list[dict] = []
-        self.attributes.training_params = initialize_output_dir(self.attributes.training_params)
+        self.attributes.training_params = cast(TrainConfig, initialize_output_dir(self.attributes.training_params))
 
     def _check_dataset_path(self) -> bool:
         """
@@ -135,7 +138,8 @@ class RFDETRTrain(RFDETRModelBase):
         if not self._check_dataset_path():
             return container
         self.model.callbacks[self.attributes.callback].append(self._history_callback)
-        self.model.train(**self.attributes.training_params.model_dump(exclude_none=True))
+        train_attributes = self.attributes.training_params.model_dump(exclude_none=True)
+        self.model.train(**train_attributes)
         self.save_metrics(container)
 
         return container

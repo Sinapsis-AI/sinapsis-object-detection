@@ -64,7 +64,7 @@ def validate_hub_dataset_license(dataset_path: str) -> None:
 
     try:
         repo_info = dataset_info(dataset_path)
-        license_info = repo_info.card_data.get("license")
+        license_info = repo_info.card_data.get("license") if repo_info.card_data is not None else None
 
         if not license_info:
             raise ValueError(f"Dataset '{dataset_path}' has no license specified and cannot be used.")
@@ -134,4 +134,4 @@ def prepare_detection_batch(
         ]
         batch_annotations.append({"image_id": i, "annotations": individual_annotations})
 
-    return processor(images=images, annotations=batch_annotations, return_tensors="pt")
+    return processor(images=images, annotations=batch_annotations, return_tensors="pt")  # ty: ignore[call-non-callable]
